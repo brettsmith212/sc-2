@@ -84,16 +84,23 @@
 
 ## Demo UI & Integration
 
-- [ ] Step 6: Build minimal SwiftUI screen
+- [x] Step 6: Build minimal SwiftUI screen
   - **Task**: Form with address fields, “Validate” button, and JSON response viewer.
   - **Description**: Lets stakeholders manually test addresses inside the app.
   - **Files**:
-    - `Sources/UI/AddressValidationView.swift`
+    - `sc-2/Views/AddressValidationView.swift`
   - **Step Dependencies**: Steps 1, 5
-  - **Agent Instructions**:
-    - Use `@State` for input fields.
-    - Call `UPSAddressValidationService.validate` inside `Task {}`.
-    - Display success JSON or error text in a scrollable `TextEditor`.
+  - **Implementation**:
+    1. ✅ Created comprehensive SwiftUI form with address input fields (street, city, state, postal code, country code).
+    2. ✅ Implemented validation options picker for `.validation`, `.classification`, and `.both`.
+    3. ✅ Added `@State` properties for all input fields and validation states.
+    4. ✅ Integrated `UPSAddressValidationService.validate` call inside async `Task {}`.
+    5. ✅ Built scrollable result display with formatted success/error responses.
+    6. ✅ Added loading states, progress indicators, and form validation.
+    7. ✅ Included sample address button for easy testing.
+    8. ✅ Created user-friendly error messages and formatted JSON response display.
+    9. ✅ Integrated with main `ContentView` using sheet presentation.
+    10. ✅ Added comprehensive UI polish with proper styling and accessibility.
 
 ## Logging & Error Reporting
 
