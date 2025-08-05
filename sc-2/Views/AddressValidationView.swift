@@ -9,10 +9,11 @@ struct AddressValidationView: View {
     @State private var state: String = ""
     @State private var postalCode: String = ""
     @State private var countryCode: String = "US"
-    @State private var requestOption: UPSRequestOption = .validation
+    @State private var requestOption: UPSRequestOption = .both
     
     @State private var isValidating: Bool = false
-    @State private var validationResult: String = ""
+    @State private var validationResponse: XAVResponse?
+    @State private var validationError: UPSError?
     @State private var showingResult: Bool = false
     
     // MARK: - Service
@@ -28,7 +29,6 @@ struct AddressValidationView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         formSection
-                        optionsSection
                         validateButton
                     }
                     .padding()
@@ -42,7 +42,7 @@ struct AddressValidationView: View {
             }
             .navigationTitle("UPS Address Validation")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .navigationBarTrailing) {
                     sampleAddressButton
                 }
             }
@@ -68,36 +68,17 @@ struct AddressValidationView: View {
                 
                 HStack(spacing: 12) {
                     inputField("ZIP Code", text: $postalCode, placeholder: "94043")
-                        .keyboardType(.numberPad)
                     inputField("Country", text: $countryCode, placeholder: "US")
                         .frame(maxWidth: 80)
                 }
             }
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color(UIColor.systemGray6))
         .cornerRadius(12)
     }
     
-    // MARK: - Options Section
-    
-    private var optionsSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Validation Options")
-                .font(.headline)
-                .foregroundColor(.primary)
-            
-            Picker("Request Type", selection: $requestOption) {
-                Text("Address Validation").tag(UPSRequestOption.validation)
-                Text("Address Classification").tag(UPSRequestOption.classification)
-                Text("Both").tag(UPSRequestOption.both)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-        }
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
-    }
+
     
     // MARK: - Validate Button
     
@@ -126,36 +107,171 @@ struct AddressValidationView: View {
     // MARK: - Result Section
     
     private var resultSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
             HStack {
-                Text("Validation Result")
+                Text("Validation Results")
                     .font(.headline)
+                    .foregroundColor(.primary)
                 Spacer()
                 Button("Dismiss") {
                     withAnimation {
                         showingResult = false
-                        validationResult = ""
+                        validationResponse = nil
+                        validationError = nil
                     }
                 }
                 .font(.caption)
                 .foregroundColor(.blue)
             }
-            .padding(.horizontal)
-            .padding(.top, 8)
+            .padding()
+            .background(Color(UIColor.systemGray6))
             
-            ScrollView {
-                Text(validationResult)
-                    .font(.system(size: 12, design: .monospaced))
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
+            // Content with proper scrolling
+            if let error = validationError {
+                errorResultView(error)
+            } else if let response = validationResponse {
+                successResultView(response)
             }
-            .frame(maxHeight: 300)
-            .background(Color(.systemGray6))
-            .cornerRadius(8)
-            .padding(.horizontal)
-            .padding(.bottom)
         }
-        .background(Color(.systemBackground))
+        .background(Color(UIColor.systemBackground))
+        .frame(maxHeight: UIScreen.main.bounds.height * 0.6)
+        .clipped()
+    }
+    
+    private func errorResultView(_ error: UPSError) -> some View {
+        ScrollView(.vertical, showsIndicators: true) {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.red)
+                    Text("Validation Failed")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                }
+                .padding(.top)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Error Details")
+                        .font(.headline)
+                    Text(UPSAddressValidationService.userFriendlyMessage(for: error))
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                }
+                
+                // Add some bottom padding for better scrolling
+                Color.clear.frame(height: 20)
+            }
+            .padding()
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    private func successResultView(_ response: XAVResponse) -> some View {
+        ScrollView(.vertical, showsIndicators: true) {
+            VStack(alignment: .leading, spacing: 16) {
+                // Status Header
+                HStack {
+                    statusIcon(for: response)
+                    Text(statusText(for: response))
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                }
+                .padding(.top)
+                
+                // Address Candidates
+                if let candidates = response.candidate, !candidates.isEmpty {
+                    addressCandidatesSection(candidates)
+                } else {
+                    noAddressFoundSection()
+                }
+                
+                // Add some bottom padding for better scrolling
+                Color.clear.frame(height: 20)
+            }
+            .padding()
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    private func statusIcon(for response: XAVResponse) -> some View {
+        Group {
+            if response.isValid {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+            } else if response.isAmbiguous {
+                Image(systemName: "questionmark.circle.fill")
+                    .foregroundColor(.orange)
+            } else {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.red)
+            }
+        }
+        .font(.title)
+    }
+    
+    private func statusText(for response: XAVResponse) -> String {
+        if response.isValid {
+            return "Address Validated"
+        } else if response.isAmbiguous {
+            return "Similar Addresses Found"
+        } else {
+            return "Address Not Found"
+        }
+    }
+    
+    private func addressCandidatesSection(_ candidates: [AddressCandidate]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(candidates.count == 1 ? "Validated Address" : "Address Suggestions (\(candidates.count))")
+                .font(.headline)
+            
+            ForEach(Array(candidates.enumerated()), id: \.offset) { index, candidate in
+                addressCandidateCard(candidate, index: index)
+            }
+        }
+    }
+    
+    private func addressCandidateCard(_ candidate: AddressCandidate, index: Int) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if let address = candidate.addressKeyFormat {
+                HStack {
+                    Image(systemName: "location.fill")
+                        .foregroundColor(.blue)
+                        .font(.caption)
+                    Text(address.formattedAddress)
+                        .font(.body)
+                        .fontWeight(.medium)
+                }
+                
+                if let classification = candidate.addressClassification {
+                    HStack {
+                        Image(systemName: "tag.fill")
+                            .foregroundColor(.secondary)
+                            .font(.caption2)
+                        Text(classification.description)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(Color(UIColor.systemGray6))
+        .cornerRadius(8)
+    }
+    
+    private func noAddressFoundSection() -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("No Address Found")
+                .font(.headline)
+            
+            Text("The address you entered could not be validated. Please check the spelling and try again.")
+                .font(.body)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(Color(UIColor.systemGray6))
+        .cornerRadius(8)
     }
     
     // MARK: - Sample Address Button
@@ -203,7 +319,8 @@ struct AddressValidationView: View {
         guard isFormValid else { return }
         
         isValidating = true
-        validationResult = ""
+        validationResponse = nil
+        validationError = nil
         
         Task {
             let result = await validationService.validateAddress(
@@ -220,9 +337,9 @@ struct AddressValidationView: View {
                 
                 switch result {
                 case .success(let response):
-                    validationResult = formatSuccessResponse(response)
+                    validationResponse = response
                 case .failure(let error):
-                    validationResult = formatErrorResponse(error)
+                    validationError = error
                 }
                 
                 withAnimation {
@@ -230,75 +347,6 @@ struct AddressValidationView: View {
                 }
             }
         }
-    }
-    
-    private func formatSuccessResponse(_ response: XAVResponse) -> String {
-        var result = "✅ VALIDATION SUCCESS\n\n"
-        
-        // Status indicators
-        if response.isValid {
-            result += "🟢 Address is VALID\n"
-        } else if response.isAmbiguous {
-            result += "🟡 Address is AMBIGUOUS\n"
-        } else if response.hasNoCandidates {
-            result += "🔴 No candidates found\n"
-        } else {
-            result += "❓ Unknown validation status\n"
-        }
-        
-        result += "\n"
-        
-        // Candidates
-        if let candidates = response.candidate, !candidates.isEmpty {
-            result += "📋 CANDIDATES (\(candidates.count)):\n\n"
-            
-            for (index, candidate) in candidates.enumerated() {
-                result += "--- Candidate \(index + 1) ---\n"
-                
-                if let address = candidate.addressKeyFormat {
-                    result += "📍 Address:\n\(address.formattedAddress)\n\n"
-                }
-                
-                if let classification = candidate.addressClassification {
-                    result += "🏷️ Classification: \(classification.description ?? "Unknown")\n"
-                    result += "   Code: \(classification.code ?? "N/A")\n\n"
-                }
-            }
-        }
-        
-        // Raw JSON for debugging
-        result += "\n📄 RAW JSON RESPONSE:\n"
-        if let jsonData = try? JSONEncoder().encode(response),
-           let jsonString = String(data: jsonData, encoding: .utf8) {
-            result += formatJSON(jsonString)
-        } else {
-            result += "Failed to serialize response to JSON"
-        }
-        
-        return result
-    }
-    
-    private func formatErrorResponse(_ error: UPSError) -> String {
-        var result = "❌ VALIDATION ERROR\n\n"
-        
-        result += "🔍 Error Details:\n"
-        result += UPSAddressValidationService.userFriendlyMessage(for: error)
-        result += "\n\n"
-        
-        result += "🛠️ Technical Details:\n"
-        result += error.localizedDescription
-        
-        return result
-    }
-    
-    private func formatJSON(_ jsonString: String) -> String {
-        guard let data = jsonString.data(using: .utf8),
-              let jsonObject = try? JSONSerialization.jsonObject(with: data),
-              let prettyData = try? JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted]),
-              let prettyString = String(data: prettyData, encoding: .utf8) else {
-            return jsonString
-        }
-        return prettyString
     }
 }
 
