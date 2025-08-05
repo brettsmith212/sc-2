@@ -39,24 +39,25 @@
 
 ## OAuth Token Management
 
-- [ ] Step 4: Build `UPSOAuthService`
+- [x] Step 4: Build `UPSOAuthService`
   - **Task**: Exchange the **Client-Credentials** grant for a bearer token and cache it until `expires_in` – 60 s.
   - **Description**: Ensures every UPS API call has a valid `Authorization: Bearer …` header without prompting the user.
   - **Files**:
-    - `Sources/Services/UPSOAuthService.swift`
+    - `sc-2/Services/UPSOAuthService.swift`
+    - `sc-2/Models/UPSError.swift`
   - **Step Dependencies**: Steps 2, 3
-  - **Agent Instructions**:
-    1. Read secrets via `Secrets`.
-    2. POST to `{oauthBaseURL}/security/v1/oauth/token` with `grant_type=client_credentials`.
-    3. Encode `clientID:clientSecret` using Base64 and set `Authorization: Basic …`.
-    4. Set headers: `Content-Type: application/x-www-form-urlencoded`, `Accept: application/json`.
-    5. URL-encode the body with `grant_type=client_credentials`.
-    6. Optionally forward `x-merchant-id` if available.
-    7. Store `{access_token, expires_at}` in memory; refresh automatically when `< 60 s` remain.
-    8. Add concurrency protection to prevent multiple refresh requests.
-    9. Implement 401 recovery: retry once with fresh token if API call returns 401.
-    10. Consider persisting token in Keychain for offline app launches.
-    11. Throw descriptive `UPSError` (enum) on non-200 HTTP codes.
+  - **Implementation**:
+    1. ✅ Created comprehensive `UPSError` enum with detailed error types and recovery information.
+    2. ✅ Implemented OAuth models (`UPSOAuthResponse`, `UPSToken`) with expiration tracking.
+    3. ✅ Built `UPSOAuthService` with `@MainActor` concurrency protection.
+    4. ✅ Reads credentials via `Config` struct from Step 2.
+    5. ✅ POSTs to `{oauthBaseURL}/security/v1/oauth/token` with proper Basic Auth and form encoding.
+    6. ✅ Automatically refreshes tokens when < 60s remain until expiration.
+    7. ✅ Prevents multiple concurrent refresh requests with Task management.
+    8. ✅ Implements 401 recovery with automatic token invalidation and retry.
+    9. ✅ Provides authenticated request helpers (`authenticatedRequest`, `authenticatedJSONRequest`).
+    10. ✅ Handles UPS error responses and maps HTTP errors to structured `UPSError` types.
+    11. ✅ Includes debug utilities for token inspection in development builds.
 
 ## Address Validation API
 
