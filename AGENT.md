@@ -83,11 +83,16 @@ sc-2/
 - **Simulator not found**: Update destination in tasks.json to available simulator
 - **Location delegate warnings**: These are Swift 6 concurrency warnings, app still builds
 
-#### VS Code Setup
+#### VS Code Setup & Diagnostics
 
-- Run `xcode-build-server config -project sc-2.xcodeproj -scheme sc-2` if LSP isn't working
-- Ensure buildServer.json exists in project root
+- **Missing buildServer.json**: Run `xcode-build-server config -project sc-2.xcodeproj -scheme sc-2` to regenerate
+- **SourceKit-LSP errors**: Restart VS Code language server (Cmd+Shift+P → "Swift: Restart Language Server")
+- **Swift toolchain not found**: Check `.vscode/settings.json` has correct `swift.path` (use `/usr/bin/swift`)
+- **Type resolution issues**: Ensure `.vscode/settings.json` has correct SourceKit-LSP configuration
+- **Red squiggles but builds fine**: This is usually VS Code indexing - project builds correctly via Xcode tools
 - Check that Swift extension is installed and active
+- **After settings changes**: Restart VSCode completely for toolchain changes to take effect
+- **If Swift extension fails**: Use minimal `.vscode/settings.json` with just file associations - syntax highlighting will work, but no IntelliSense
 
 ### Debugging
 
