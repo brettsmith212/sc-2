@@ -21,15 +21,21 @@
 
 ## Networking Layer
 
-- [ ] Step 3: Foundation HTTP helpers
+- [x] Step 3: Foundation HTTP helpers
   - **Task**: Implement a tiny `HTTPClient` wrapper using `URLSession` and `async/await`.
   - **Description**: Centralizes all networking (headers, status-code checks, JSON (de)serialization) to avoid duplication.
   - **Files**:
-    - `Sources/Networking/HTTPClient.swift`: generic `request()` that returns `(Data, HTTPURLResponse)`
+    - `sc-2/Networking/HTTPClient.swift`: generic `request()` that returns `(Data, HTTPURLResponse)`
   - **Step Dependencies**: Step 1
-  - **Agent Instructions**:
-    - Include exponential-backoff retry stub (configurable).
-    - Accept `additionalHeaders: [String:String]` per call.
+  - **Implementation**:
+    1. ✅ Created comprehensive `HTTPClient` class with modern async/await support.
+    2. ✅ Implemented configurable exponential backoff retry with jitter.
+    3. ✅ Added support for `additionalHeaders: [String:String]` per call.
+    4. ✅ Included specialized methods for JSON (`requestJSON`) and form-encoded (`requestForm`) requests.
+    5. ✅ Added proper error handling with `HTTPClientError` enum.
+    6. ✅ Implemented Retry-After header support for 429 responses.
+    7. ✅ Added response status helpers (`isSuccessful`, `isClientError`, `isServerError`).
+    8. ✅ Included JSON decoding and pretty-printing utilities for debugging.
 
 ## OAuth Token Management
 
