@@ -101,6 +101,7 @@ Thumbs.db
 .env
 .env.local
 .env.*.local
+Config.xcconfig
 
 # Bundle artifacts
 **/*.bundle

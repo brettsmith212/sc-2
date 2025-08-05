@@ -26,25 +26,42 @@ From your UPS app dashboard, collect:
   - OAuth: `https://onlinetools.ups.com/`
   - API: `https://onlinetools.ups.com/`
 
-### 5. Create Your Secrets File
-Copy `Config/Secrets.plist.example` to `Config/Secrets.plist` and fill in:
+### 5. Create Your Configuration File
+Copy `Config.xcconfig.example` to `Config.xcconfig` and fill in your values:
+```bash
+# UPS API Configuration
+UPS_CLIENT_ID = your_client_id_here
+UPS_CLIENT_SECRET = your_client_secret_here
+UPS_MERCHANT_ID = your_6_digit_account_number
+UPS_OAUTH_BASE_URL = https:/$()/wwwcie.ups.com/
+UPS_API_BASE_URL = https:/$()/wwwcie.ups.com/
+```
+
+### 6. Configure Xcode Project
+1. In Xcode, select your project in the navigator
+2. Select the **sc-2** target
+3. Go to **Build Settings** tab
+4. Search for "User-Defined"
+5. Add the following User-Defined Settings:
+   - `UPS_CLIENT_ID` = `$(UPS_CLIENT_ID)`
+   - `UPS_CLIENT_SECRET` = `$(UPS_CLIENT_SECRET)`
+   - `UPS_MERCHANT_ID` = `$(UPS_MERCHANT_ID)`
+   - `UPS_OAUTH_BASE_URL` = `$(UPS_OAUTH_BASE_URL)`
+   - `UPS_API_BASE_URL` = `$(UPS_API_BASE_URL)`
+
+### 7. Update Info.plist
+Add these keys to your Info.plist:
 ```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>UPS_CLIENT_ID</key>
-    <string>your_client_id_here</string>
-    <key>UPS_CLIENT_SECRET</key>
-    <string>your_client_secret_here</string>
-    <key>UPS_MERCHANT_ID</key>
-    <string>your_6_digit_account_number</string>
-    <key>UPS_OAUTH_BASE_URL</key>
-    <string>https://wwwcie.ups.com/</string>
-    <key>UPS_API_BASE_URL</key>
-    <string>https://wwwcie.ups.com/</string>
-</dict>
-</plist>
+<key>UPS_CLIENT_ID</key>
+<string>$(UPS_CLIENT_ID)</string>
+<key>UPS_CLIENT_SECRET</key>
+<string>$(UPS_CLIENT_SECRET)</string>
+<key>UPS_MERCHANT_ID</key>
+<string>$(UPS_MERCHANT_ID)</string>
+<key>UPS_OAUTH_BASE_URL</key>
+<string>$(UPS_OAUTH_BASE_URL)</string>
+<key>UPS_API_BASE_URL</key>
+<string>$(UPS_API_BASE_URL)</string>
 ```
 
 ## Important Notes
@@ -59,6 +76,7 @@ Copy `Config/Secrets.plist.example` to `Config/Secrets.plist` and fill in:
 - Update URLs to production endpoints when ready
 
 ### Security
-- Never commit `Config/Secrets.plist` to version control
+- Never commit `Config.xcconfig` to version control
+- The build system injects values at build time
 - Consider using Keychain for token persistence
 - Keep credentials secure and rotate them periodically

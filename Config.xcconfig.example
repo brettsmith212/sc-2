@@ -1,0 +1,9 @@
+// UPS API Configuration Template
+// Copy this file to Config.xcconfig and fill in your actual values
+// Config.xcconfig should be gitignored
+
+UPS_CLIENT_ID = <FILL-ME>
+UPS_CLIENT_SECRET = <FILL-ME>
+UPS_MERCHANT_ID = <FILL-ME>
+UPS_OAUTH_BASE_URL = https:/$()/wwwcie.ups.com/
+UPS_API_BASE_URL = https:/$()/wwwcie.ups.com/

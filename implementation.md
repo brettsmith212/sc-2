@@ -2,18 +2,22 @@
 
 ## Configuration & Secrets
 
-- [ ] Step 2: Externalize UPS credentials and endpoints
-  - **Task**: Create a secure configuration model that loads the **Client ID**, **Client Secret**, optional **Merchant ID**, and environment-specific URLs at run-time.
-  - **Description**: Keeps credentials out of source control and lets the human integrator supply them without re-compiling.
+- [x] Step 2: Externalize UPS credentials and endpoints
+  - **Task**: Create a secure configuration model that loads the **Client ID**, **Client Secret**, optional **Merchant ID**, and environment-specific URLs at run-time using iOS industry standard Build Settings approach.
+  - **Description**: Keeps credentials out of source control using .xcconfig files and Xcode build system integration. No manual Xcode configuration required.
   - **Files**:
-    - `Config/Secrets.plist.example`: property-list template with keys `UPS_CLIENT_ID`, `UPS_CLIENT_SECRET`, `UPS_MERCHANT_ID`, `UPS_OAUTH_BASE_URL`, `UPS_API_BASE_URL`
-    - `Sources/Secrets.swift`: lightweight loader that reads the plist into memory, throws if any key is missing
+    - `Config.xcconfig.example`: Configuration template with keys `UPS_CLIENT_ID`, `UPS_CLIENT_SECRET`, `UPS_MERCHANT_ID`, `UPS_OAUTH_BASE_URL`, `UPS_API_BASE_URL`
+    - `Config.xcconfig`: Actual credentials file (gitignored)
+    - `sc-2/Config.swift`: Configuration loader that reads from Bundle.main.infoDictionary
   - **Step Dependencies**: Step 1
-  - **Agent Instructions**:
-    1. Generate `.example` file with placeholder values (`"<FILL-ME>"`).
-    2. Add `Config/Secrets.plist` to `.gitignore`.
-    3. In `Secrets.swift`, expose `public struct Secrets { let clientID: String; let clientSecret: String; let merchantID: String?; let oauthBaseURL: String; let apiBaseURL: String }`.
-    4. Include both OAuth base URL (security endpoint) and API base URL (main endpoints) separately.
+  - **Implementation**:
+    1. ✅ Created `Config.xcconfig.example` with placeholder values (`"<FILL-ME>"`).
+    2. ✅ Added `Config.xcconfig` to `.gitignore`.
+    3. ✅ Implemented `public struct Config { let clientID: String; let clientSecret: String; let merchantID: String?; let oauthBaseURL: String; let apiBaseURL: String }`.
+    4. ✅ Uses iOS industry standard Build Settings integration - .xcconfig automatically populates build settings.
+    5. ✅ Includes OAuth base URL (security endpoint) and API base URL (main endpoints) separately.
+    6. ✅ Graceful handling of optional merchant ID.
+    7. ✅ Comprehensive error messages for missing configuration.
 
 ## Networking Layer
 
