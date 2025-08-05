@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug iOS App (Simulator)",
+      "type": "lldb",
+      "request": "attach",
+      "program": "${workspaceFolder}/build/Build/Products/Debug-iphonesimulator/sc-2.app/sc-2",
+      "waitFor": true,
+      "preLaunchTask": "iOS: Build Debug (simulator)"
+    },
+    {
+      "name": "Debug iOS App (Device)",
+      "type": "lldb",
+      "request": "attach",
+      "program": "${workspaceFolder}/build/Build/Products/Debug-iphoneos/sc-2.app/sc-2",
+      "waitFor": true
+    }
+  ]
+}
