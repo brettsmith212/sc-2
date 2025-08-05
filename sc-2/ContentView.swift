@@ -66,7 +66,7 @@ struct ContentView: View {
             }
             .padding()
             .navigationTitle("sc-2")
-            .navigationBarHidden(true)
+            .navigationBarBackButtonHidden(true)
         }
         .sheet(isPresented: $showingAddressValidation) {
             AddressValidationView()

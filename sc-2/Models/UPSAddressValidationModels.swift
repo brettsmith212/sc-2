@@ -44,6 +44,15 @@ public struct UPSAddressValidationRequest {
 
 // MARK: - UPS API Request Format
 
+// Top-level wrapper for UPS XAV API
+struct XAVRequestWrapper: Codable {
+    let xavRequest: XAVRequest
+    
+    enum CodingKeys: String, CodingKey {
+        case xavRequest = "XAVRequest"
+    }
+}
+
 struct XAVRequest: Codable {
     let addressKeyFormat: AddressKeyFormat
     
@@ -58,7 +67,7 @@ struct AddressKeyFormat: Codable {
     let region: String
     let politicalDivision2: String
     let politicalDivision1: String
-    let postcodePrimary: String
+    let postcodePrimaryLow: String
     let countryCode: String
     
     enum CodingKeys: String, CodingKey {
@@ -67,7 +76,7 @@ struct AddressKeyFormat: Codable {
         case region = "Region"
         case politicalDivision2 = "PoliticalDivision2"
         case politicalDivision1 = "PoliticalDivision1"
-        case postcodePrimary = "PostcodePrimary"
+        case postcodePrimaryLow = "PostcodePrimaryLow"
         case countryCode = "CountryCode"
     }
     
@@ -77,24 +86,77 @@ struct AddressKeyFormat: Codable {
         self.region = ""
         self.politicalDivision2 = address.city
         self.politicalDivision1 = address.state
-        self.postcodePrimary = address.postalCode
+        self.postcodePrimaryLow = address.postalCode
         self.countryCode = address.countryCode
     }
 }
 
 // MARK: - Response Models
 
+// Top-level wrapper for UPS XAV API response
+public struct XAVResponseWrapper: Codable {
+    public let xavResponse: XAVResponse
+    
+    enum CodingKeys: String, CodingKey {
+        case xavResponse = "XAVResponse"
+    }
+}
+
 public struct XAVResponse: Codable {
+    public let response: UPSResponseInfo
     public let validAddressIndicator: String?
     public let ambiguousAddressIndicator: String?
     public let noCandidatesIndicator: String?
+    public let addressClassification: AddressClassification?
     public let candidate: [AddressCandidate]?
     
     enum CodingKeys: String, CodingKey {
+        case response = "Response"
         case validAddressIndicator = "ValidAddressIndicator"
         case ambiguousAddressIndicator = "AmbiguousAddressIndicator"
         case noCandidatesIndicator = "NoCandidatesIndicator"
+        case addressClassification = "AddressClassification"
         case candidate = "Candidate"
+    }
+}
+
+public struct UPSResponseInfo: Codable {
+    public let responseStatus: ResponseStatus
+    public let transactionReference: TransactionReference?
+    
+    enum CodingKeys: String, CodingKey {
+        case responseStatus = "ResponseStatus"
+        case transactionReference = "TransactionReference"
+    }
+}
+
+public struct ResponseStatus: Codable {
+    public let code: String
+    public let description: String
+    
+    enum CodingKeys: String, CodingKey {
+        case code = "Code"
+        case description = "Description"
+    }
+}
+
+public struct TransactionReference: Codable {
+    public let customerContext: String?
+    public let transactionIdentifier: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case customerContext = "CustomerContext"
+        case transactionIdentifier = "TransactionIdentifier"
+    }
+}
+
+public struct AddressClassification: Codable {
+    public let code: String
+    public let description: String
+    
+    enum CodingKeys: String, CodingKey {
+        case code = "Code"
+        case description = "Description"
     }
 }
 
@@ -114,8 +176,8 @@ public struct ResponseAddressKeyFormat: Codable {
     public let region: String?
     public let politicalDivision2: String?
     public let politicalDivision1: String?
-    public let postcodePrimary: String?
-    public let postcodeExtended: String?
+    public let postcodePrimaryLow: String?
+    public let postcodeExtendedLow: String?
     public let countryCode: String?
     
     enum CodingKeys: String, CodingKey {
@@ -124,19 +186,9 @@ public struct ResponseAddressKeyFormat: Codable {
         case region = "Region"
         case politicalDivision2 = "PoliticalDivision2"
         case politicalDivision1 = "PoliticalDivision1"
-        case postcodePrimary = "PostcodePrimary"
-        case postcodeExtended = "PostcodeExtended"
+        case postcodePrimaryLow = "PostcodePrimaryLow"
+        case postcodeExtendedLow = "PostcodeExtendedLow"
         case countryCode = "CountryCode"
-    }
-}
-
-public struct AddressClassification: Codable {
-    public let code: String?
-    public let description: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case code = "Code"
-        case description = "Description"
     }
 }
 
@@ -146,15 +198,16 @@ public struct AddressClassification: Codable {
 
 extension XAVResponse {
     public var isValid: Bool {
-        return validAddressIndicator != nil
+        // UPS returns an empty string for ValidAddressIndicator when address is valid
+        return validAddressIndicator != nil && response.responseStatus.code == "1"
     }
     
     public var isAmbiguous: Bool {
-        return ambiguousAddressIndicator != nil
+        return ambiguousAddressIndicator != nil && !ambiguousAddressIndicator!.isEmpty
     }
     
     public var hasNoCandidates: Bool {
-        return noCandidatesIndicator != nil
+        return noCandidatesIndicator != nil && !noCandidatesIndicator!.isEmpty
     }
     
     public var hasResults: Bool {
@@ -163,6 +216,10 @@ extension XAVResponse {
     
     public var bestCandidate: AddressCandidate? {
         return candidate?.first
+    }
+    
+    public var isSuccessful: Bool {
+        return response.responseStatus.code == "1"
     }
 }
 
@@ -182,11 +239,11 @@ extension ResponseAddressKeyFormat {
             if !cityStateZip.isEmpty { cityStateZip += ", " }
             cityStateZip += state
         }
-        if let zip = postcodePrimary {
+        if let zip = postcodePrimaryLow {
             if !cityStateZip.isEmpty { cityStateZip += " " }
             cityStateZip += zip
         }
-        if let zipExt = postcodeExtended {
+        if let zipExt = postcodeExtendedLow {
             cityStateZip += "-\(zipExt)"
         }
         

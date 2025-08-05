@@ -128,7 +128,7 @@ public struct UPSErrorResponse: Codable {
 public struct UPSOAuthResponse: Codable {
     public let accessToken: String
     public let tokenType: String
-    public let expiresIn: Int
+    public let expiresIn: String
     public let scope: String?
     public let issuedAt: String?
     
@@ -142,7 +142,8 @@ public struct UPSOAuthResponse: Codable {
     
     /// Calculate the expiration date from the current time
     public var expiresAt: Date {
-        return Date().addingTimeInterval(TimeInterval(expiresIn))
+        let seconds = Int(expiresIn) ?? 3600 // Default to 1 hour if parsing fails
+        return Date().addingTimeInterval(TimeInterval(seconds))
     }
 }
 

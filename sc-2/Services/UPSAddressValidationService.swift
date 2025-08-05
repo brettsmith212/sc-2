@@ -49,9 +49,9 @@ public final class UPSAddressValidationService: ObservableObject {
             )
             
             // Decode the response
-            let response = try JSONDecoder().decode(XAVResponse.self, from: data)
+            let responseWrapper = try JSONDecoder().decode(XAVResponseWrapper.self, from: data)
             
-            return .success(response)
+            return .success(responseWrapper.xavResponse)
             
         } catch let error as UPSError {
             return .failure(error)
@@ -86,9 +86,10 @@ public final class UPSAddressValidationService: ObservableObject {
         return url
     }
     
-    private func createRequestBody(from address: UPSAddress) -> XAVRequest {
+    private func createRequestBody(from address: UPSAddress) -> XAVRequestWrapper {
         let addressKeyFormat = AddressKeyFormat(from: address)
-        return XAVRequest(addressKeyFormat: addressKeyFormat)
+        let xavRequest = XAVRequest(addressKeyFormat: addressKeyFormat)
+        return XAVRequestWrapper(xavRequest: xavRequest)
     }
     
     private func buildHeaders(authHeader: String) -> [String: String] {

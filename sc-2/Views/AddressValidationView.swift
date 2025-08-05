@@ -41,9 +41,8 @@ struct AddressValidationView: View {
                 }
             }
             .navigationTitle("UPS Address Validation")
-            .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarTrailing) {
                     sampleAddressButton
                 }
             }
