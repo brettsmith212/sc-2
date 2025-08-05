@@ -274,7 +274,7 @@ extension UPSAddressValidationService {
                 }
                 
                 if let classification = candidate.addressClassification {
-                    result += "Classification: \(classification.description ?? "Unknown") (Code: \(classification.code ?? "N/A"))\n"
+                    result += "Classification: \(classification.description) (Code: \(classification.code))\n"
                 }
             }
         }
