@@ -61,23 +61,26 @@
 
 ## Address Validation API
 
-- [ ] Step 5: Implement `UPSAddressValidationService`
+- [x] Step 5: Implement `UPSAddressValidationService`
   - **Task**: Provide a Swift function `validate(address:requestOption:)` that returns the UPS XAV response model.
   - **Description**: Proof-of-concept business feature the stakeholder will demo.
   - **Files**:
-    - `Sources/Models/UPSAddressValidationModels.swift`: Codable structs for request/response with proper error handling
-    - `Sources/Services/UPSAddressValidationService.swift`
+    - `sc-2/Models/UPSAddressValidationModels.swift`: Codable structs for request/response with proper error handling
+    - `sc-2/Services/UPSAddressValidationService.swift`
   - **Step Dependencies**: Steps 3, 4
-  - **Agent Instructions**:
-    1. Accept parameter struct containing `street`, `city`, `state`, `postalCode`, `countryCode`.
-    2. Add `requestOption` enum: `.validation(1)`, `.classification(2)`, `.both(3)`.
-    3. Support optional query parameters: `regionalrequestindicator`, `maximumcandidatelistsize`.
-    4. Craft JSON body per v2 spec with `XAVRequest` wrapper containing `AddressKeyFormat`.
-    5. POST to `{apiBaseURL}/api/addressvalidation/v2/{requestOption}`.
-    6. Headers: `Authorization: Bearer <token>`, `transId: UUID().uuidString` (max 32 chars), `transactionSrc: iOSDemo`, `Content-Type: application/json`, `Accept: application/json`.
-    7. Return `Result<XAVResponse, UPSError>` to surface validation error codes (100910, 120002, 160002).
-    8. Handle UPS error wrapper: `{ "response": { "errors": [...] } }`.
-    9. Code defensively for Candidate array in v2 responses.
+  - **Implementation**:
+    1. ✅ Created comprehensive request/response models with `UPSAddress`, `UPSRequestOption`, and `XAVResponse`.
+    2. ✅ Implemented `UPSRequestOption` enum with `.validation(1)`, `.classification(2)`, `.both(3)`.
+    3. ✅ Added support for optional query parameters: `regionalrequestindicator`, `maximumcandidatelistsize`.
+    4. ✅ Built JSON request body per v2 spec with `XAVRequest` wrapper containing `AddressKeyFormat`.
+    5. ✅ Configured POST to `{apiBaseURL}/api/addressvalidation/v2/{requestOption}` with proper URL building.
+    6. ✅ Added all required headers: `Authorization: Bearer <token>`, `transId: UUID().uuidString` (max 32 chars), `transactionSrc: iOSDemo`, `Content-Type: application/json`, `Accept: application/json`.
+    7. ✅ Returns `Result<XAVResponse, UPSError>` with specific error handling for validation codes (100910, 120002, 160002).
+    8. ✅ Integrated with existing UPS error handling system from `UPSError.swift`.
+    9. ✅ Includes defensive coding for Candidate array in v2 responses with proper optionals.
+    10. ✅ Added convenience methods for common use cases and user-friendly error messages.
+    11. ✅ Implemented debug helpers and sample address testing for development.
+    12. ✅ Added comprehensive extensions for response interpretation (`isValid`, `isAmbiguous`, `formattedAddress`).
 
 ## Demo UI & Integration
 

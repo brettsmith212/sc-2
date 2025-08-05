@@ -5,6 +5,7 @@ public enum UPSError: LocalizedError {
     case configurationError(String)
     case authenticationFailed(Int, String?)
     case invalidCredentials
+    case invalidURL(String)
     case tokenExpired
     case tokenRefreshFailed(Error)
     case networkError(Error)
@@ -24,6 +25,8 @@ public enum UPSError: LocalizedError {
             return "Authentication failed (HTTP \(code)): \(message ?? "Unknown error")"
         case .invalidCredentials:
             return "Invalid UPS credentials provided"
+        case .invalidURL(let details):
+            return "Invalid URL: \(details)"
         case .tokenExpired:
             return "UPS access token has expired"
         case .tokenRefreshFailed(let error):
