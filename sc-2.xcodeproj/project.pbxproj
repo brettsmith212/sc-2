@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1FFDCA982E419C8F004FF726 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 1FFDCA972E419C8F004FF726 /* Config.xcconfig */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		1FFDCA752E4195DD004FF726 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		1FFDCA672E4195DB004FF726 /* sc-2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "sc-2.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FFDCA742E4195DD004FF726 /* sc-2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "sc-2Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FFDCA7E2E4195DD004FF726 /* sc-2UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "sc-2UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1FFDCA972E419C8F004FF726 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -79,6 +84,7 @@
 				1FFDCA772E4195DD004FF726 /* sc-2Tests */,
 				1FFDCA812E4195DD004FF726 /* sc-2UITests */,
 				1FFDCA682E4195DB004FF726 /* Products */,
+				1FFDCA972E419C8F004FF726 /* Config.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -212,6 +218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FFDCA982E419C8F004FF726 /* Config.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,6 +278,7 @@
 /* Begin XCBuildConfiguration section */
 		1FFDCA862E4195DD004FF726 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFDCA972E419C8F004FF726 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -330,11 +338,14 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				UPS_API_BASE_URL = "https://wwwcie.ups.com/";
+				UPS_OAUTH_BASE_URL = "https://wwwcie.ups.com/";
 			};
 			name = Debug;
 		};
 		1FFDCA872E4195DD004FF726 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFDCA972E419C8F004FF726 /* Config.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -386,12 +397,15 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				UPS_API_BASE_URL = "https://wwwcie.ups.com/";
+				UPS_OAUTH_BASE_URL = "https://wwwcie.ups.com/";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
 		1FFDCA892E4195DD004FF726 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFDCA972E419C8F004FF726 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -399,7 +413,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KFY97BH6J8;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -415,11 +430,14 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				UPS_API_BASE_URL = "https://wwwcie.ups.com/";
+				UPS_OAUTH_BASE_URL = "https://wwwcie.ups.com/";
 			};
 			name = Debug;
 		};
 		1FFDCA8A2E4195DD004FF726 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFDCA972E419C8F004FF726 /* Config.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -427,7 +445,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KFY97BH6J8;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -443,11 +462,14 @@
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				UPS_API_BASE_URL = "https://wwwcie.ups.com/";
+				UPS_OAUTH_BASE_URL = "https://wwwcie.ups.com/";
 			};
 			name = Release;
 		};
 		1FFDCA8C2E4195DD004FF726 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFDCA972E419C8F004FF726 /* Config.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -467,6 +489,7 @@
 		};
 		1FFDCA8D2E4195DD004FF726 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFDCA972E419C8F004FF726 /* Config.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -486,6 +509,7 @@
 		};
 		1FFDCA8F2E4195DD004FF726 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFDCA972E419C8F004FF726 /* Config.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -503,6 +527,7 @@
 		};
 		1FFDCA902E4195DD004FF726 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1FFDCA972E419C8F004FF726 /* Config.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
