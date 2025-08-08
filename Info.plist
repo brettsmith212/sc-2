@@ -54,5 +54,7 @@
 	<string>$(UPS_OAUTH_BASE_URL)</string>
 	<key>UPS_API_BASE_URL</key>
 	<string>$(UPS_API_BASE_URL)</string>
+	<key>UPS_ACCOUNT_NUMBER</key>
+	<string>$(UPS_ACCOUNT_NUMBER)</string>
 </dict>
 </plist>

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-iOS SwiftUI app called sc-2 with notes functionality, camera integration, location services, and notifications.
+iOS SwiftUI app called sc-2 with UPS API integration for address validation and shipping rate calculations. Originally designed for notes functionality, camera integration, location services, and notifications, now focused on demonstrating UPS shipping services.
 
 ## Build & Development Setup
 
@@ -49,18 +49,22 @@ sc-2/
 ├── sc-2/
 │   ├── sc-2App.swift                 # App entry point
 │   ├── ContentView.swift             # Main view
+│   ├── Config.swift                  # Configuration loader
 │   ├── Models/
-│   │   └── Note.swift                # Note data model
+│   │   ├── UPSRatingModels.swift     # UPS Rating API models
+│   │   ├── UPSAddressValidationModels.swift # UPS Address Validation models
+│   │   └── UPSError.swift            # UPS error handling
 │   ├── Views/
-│   │   ├── NotesListView.swift       # Notes list
-│   │   ├── NoteDetailView.swift      # Note editor
-│   │   ├── CameraView.swift          # Camera integration
-│   │   ├── LocationPickerView.swift  # Location picker
-│   │   └── ShareSheet.swift          # Share functionality
-│   └── Services/
-│       ├── LocationManager.swift     # Location services
-│       └── NotificationManager.swift # Push notifications
+│   │   ├── RateCalculationView.swift # Rate calculation form
+│   │   └── AddressValidationView.swift # Address validation form
+│   ├── Services/
+│   │   ├── UPSRatingService.swift    # UPS Rating API service
+│   │   ├── UPSAddressValidationService.swift # UPS Address Validation service
+│   │   └── UPSOAuthService.swift     # UPS OAuth authentication
+│   └── Networking/
+│       └── HTTPClient.swift          # HTTP networking layer
 ├── sc-2.xcodeproj/
+├── Config.xcconfig                   # UPS API credentials
 ├── .vscode/
 │   ├── tasks.json                    # Build tasks
 │   └── launch.json                   # Debug config
@@ -75,6 +79,26 @@ sc-2/
 - UserNotifications (push notifications)
 - MapKit (map display)
 
+### UPS API Configuration
+
+#### Required Configuration Files
+
+- **Config.xcconfig**: Contains UPS API credentials and base URLs
+
+  - `UPS_CLIENT_ID=<YOUR_CLIENT_ID>`
+  - `UPS_CLIENT_SECRET=<YOUR_CLIENT_SECRET>`
+  - `UPS_ACCOUNT_NUMBER=<YOUR_ACCOUNT_NUMBER>`
+  - `UPS_API_BASE_URL=https://wwwcie.ups.com`
+  - `UPS_OAUTH_BASE_URL=https://wwwcie.ups.com`
+
+- **Info.plist**: Maps configuration values for runtime access
+
+#### UPS API Integration Learnings
+
+- **URL Construction**: Ensure base URLs don't have trailing slashes when appending `/api` paths
+- **Account Number Required**: UPS Rating API requires valid account number in `ShipperNumber` and `BillShipper.AccountNumber` fields
+- **Error Handling**: UPS returns structured error responses with specific codes for different validation failures
+
 ### Common Issues & Solutions
 
 #### Build Errors
@@ -82,6 +106,13 @@ sc-2/
 - **PhotosPickerItem not found**: Ensure `import PhotosUI` is present
 - **Simulator not found**: Update destination in tasks.json to available simulator
 - **Location delegate warnings**: These are Swift 6 concurrency warnings, app still builds
+
+#### UPS API Issues
+
+- **400 Bad Request with missing account number**: Ensure `UPS_ACCOUNT_NUMBER` is set in Config.xcconfig and properly configured
+- **URL construction errors**: Check that API base URLs don't have double slashes (e.g., `//api` instead of `/api`)
+- **OAuth authentication failures**: Verify `UPS_CLIENT_ID` and `UPS_CLIENT_SECRET` are correct and valid
+- **Rate calculation failures**: Ensure shipper and ship-from addresses have valid `ShipperNumber` set to account number
 
 #### VS Code Setup & Diagnostics
 

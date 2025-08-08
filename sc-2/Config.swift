@@ -4,6 +4,7 @@ public struct Config {
     public let clientID: String
     public let clientSecret: String
     public let merchantID: String?
+    public let accountNumber: String?
     public let oauthBaseURL: String
     public let apiBaseURL: String
     
@@ -36,12 +37,17 @@ public struct Config {
         
         self.clientID = clientID
         self.clientSecret = clientSecret
-        self.oauthBaseURL = oauthBaseURL
-        self.apiBaseURL = apiBaseURL
+        
+        self.oauthBaseURL = oauthBaseURL.hasPrefix("http") ? oauthBaseURL : "https://\(oauthBaseURL)"
+        self.apiBaseURL = apiBaseURL.hasPrefix("http") ? apiBaseURL : "https://\(apiBaseURL)"
         
         // Merchant ID is optional
         let merchantID = infoPlist["UPS_MERCHANT_ID"] as? String
         self.merchantID = (merchantID?.isEmpty == false && merchantID != "<FILL-ME>") ? merchantID : nil
+        
+        // Account Number is optional
+        let accountNumber = infoPlist["UPS_ACCOUNT_NUMBER"] as? String
+        self.accountNumber = (accountNumber?.isEmpty == false && accountNumber != "<FILL-ME>") ? accountNumber : nil
     }
 }
 
