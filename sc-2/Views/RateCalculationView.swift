@@ -92,9 +92,9 @@ LabeledField(title: "Height", placeholder: "6", text: $height, keyboard: .decima
 VStack(spacing: 12) {
 Button { fillSample() } label: {
 Label("Use Sample Data", systemImage: "sparkles")
-        .frame(maxWidth: .infinity)
+                        .frame(maxWidth: .infinity)
 }
-.buttonStyle(TonalButtonStyle())
+                .buttonStyle(TonalButtonStyle())
 
 Button(action: calculateRates) {
                             if isLoading { ProgressView().frame(maxWidth: .infinity, minHeight: 50) }
@@ -111,8 +111,8 @@ Button(action: calculateRates) {
 .toolbar { ToolbarItem(placement: .topBarLeading) { Button("Close") { dismiss() } } }
 .sheet(isPresented: $showSheet) {
 RateResultsSheet(rateResponse: rateResponse, errorMessage: errorMessage)
-        .presentationDetents([.fraction(0.35), .medium, .large])
-        .presentationDragIndicator(.visible)
+.presentationDetents([.large])
+.presentationDragIndicator(.visible)
 }
 .onAppear(perform: initializeService)
 .navigationTitle("Rate Calculator")
@@ -215,8 +215,11 @@ var body: some View {
     .foregroundColor(Theme.Colors.warning)
 } else {
     VStack(spacing: 12) {
-    ForEach(response.RatedShipment.indices, id: \.self) { idx in
-    let r = response.RatedShipment[idx]
+    let sortedRates = response.RatedShipment.sorted { 
+    Double($0.TotalCharges.MonetaryValue) ?? 0 < Double($1.TotalCharges.MonetaryValue) ?? 0 
+                        }
+                        ForEach(sortedRates.indices, id: \.self) { idx in
+                            let r = sortedRates[idx]
 HStack(alignment: .firstTextBaseline) {
     VStack(alignment: .leading, spacing: 4) {
     Text(r.serviceName).font(Theme.Typography.headline)

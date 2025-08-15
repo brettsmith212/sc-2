@@ -60,8 +60,11 @@ struct AddressValidationView: View {
 
                     // Actions
                     VStack(spacing: 12) {
-                        Button("Use Sample") { fillSampleAddress() }
-                            .buttonStyle(GhostButtonStyle())
+                        Button { fillSampleAddress() } label: {
+                            Label("Use Sample Data", systemImage: "sparkles")
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(TonalButtonStyle())
 
                         Button(action: validateAddress) {
                             HStack {
