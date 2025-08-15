@@ -1,299 +1,249 @@
-//
-//  RateCalculationView.swift
-//  sc-2
-//
-//  Created by Assistant on 8/7/25.
-//
-
 import SwiftUI
 
 struct RateCalculationView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var ratingService: UPSRatingService?
-    
-    // Form fields - From address
+
+    // From
     @State private var fromStreet = ""
     @State private var fromCity = ""
     @State private var fromState = ""
-    @State private var fromZip = ""
-    @State private var fromCountry = "US"
-    
-    // Form fields - To address
-    @State private var toStreet = ""
-    @State private var toCity = ""
-    @State private var toState = ""
-    @State private var toZip = ""
-    @State private var toCountry = "US"
-    @State private var isResidential = false
-    
-    // Package details
-    @State private var weight = ""
-    @State private var length = ""
-    @State private var width = ""
-    @State private var height = ""
-    
-    // State management
-    @State private var isLoading = false
-    @State private var rateResponse: RateResponse?
-    @State private var errorMessage: String?
-    @State private var showingResults = false
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section("From Address") {
-                    TextField("Street Address", text: $fromStreet)
-                    TextField("City", text: $fromCity)
-                    HStack {
-                        TextField("State", text: $fromState)
-                            .textInputAutocapitalization(.characters)
-                        TextField("ZIP", text: $fromZip)
-                    }
-                    Picker("Country", selection: $fromCountry) {
-                        Text("United States").tag("US")
-                        Text("Canada").tag("CA")
-                    }
-                }
-                
-                Section("To Address") {
-                    TextField("Street Address", text: $toStreet)
-                    TextField("City", text: $toCity)
-                    HStack {
-                        TextField("State", text: $toState)
-                            .textInputAutocapitalization(.characters)
-                        TextField("ZIP", text: $toZip)
-                    }
-                    Picker("Country", selection: $toCountry) {
-                        Text("United States").tag("US")
-                        Text("Canada").tag("CA")
-                    }
-                    Toggle("Residential Address", isOn: $isResidential)
-                }
-                
-                Section("Package Details") {
-                    HStack {
-                        Text("Weight (lbs)")
-                        Spacer()
-                        TextField("0.0", text: $weight)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    HStack {
-                        Text("Length (in)")
-                        Spacer()
-                        TextField("0.0", text: $length)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    HStack {
-                        Text("Width (in)")
-                        Spacer()
-                        TextField("0.0", text: $width)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    HStack {
-                        Text("Height (in)")
-                        Spacer()
-                        TextField("0.0", text: $height)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                    }
-                }
-                
-                Section {
-                    Button("Use Sample Data") {
-                        fillSampleData()
-                    }
-                    .foregroundColor(.blue)
-                    
-                    Button(action: calculateRates) {
-                        HStack {
-                            if isLoading {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                            } else {
-                                Image(systemName: "dollarsign.circle")
-                            }
-                            Text("Calculate Rates")
-                        }
-                    }
-                    .disabled(isLoading || !isFormValid)
-                    .foregroundColor(isFormValid ? .primary : .secondary)
-                }
-                
-                // Results section
-                if showingResults {
-                    Section("Rate Results") {
-                        if let response = rateResponse {
-                            rateResultsView(response: response)
-                        } else if let error = errorMessage {
-                            Label(error, systemImage: "exclamationmark.triangle")
-                                .foregroundColor(.red)
-                        }
-                    }
-                }
-            }
-            .navigationTitle("Rate Calculator")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Close") {
-                        dismiss()
-                    }
-                }
-            }
-            .onAppear {
-                initializeService()
+@State private var fromZip = ""
+@State private var fromCountry = "US"
+
+// To
+@State private var toStreet = ""
+@State private var toCity = ""
+@State private var toState = ""
+@State private var toZip = ""
+@State private var toCountry = "US"
+@State private var isResidential = false
+
+// Package
+@State private var weight = ""
+@State private var length = ""
+@State private var width = ""
+@State private var height = ""
+
+// State
+@State private var isLoading = false
+@State private var rateResponse: RateResponse?
+@State private var errorMessage: String?
+@State private var showSheet = false
+
+var body: some View {
+    NavigationStack {
+        ScrollView {
+            VStack(spacing: Theme.Space.lg) {
+                IconTitle(systemName: "dollarsign.circle.fill",
+                          title: "Rate Calculator",
+                          subtitle: "Shop rates and ETAs")
+                    .padding(.top, Theme.Space.sm)
+
+        // From
+    ResultCard(title: "From Address", subtitle: nil) {
+    VStack(spacing: Theme.Space.md) {
+        LabeledField(title: "Street", placeholder: "123 Main Street", text: $fromStreet)
+        HStack(spacing: Theme.Space.md) {
+        LabeledField(title: "City", placeholder: "Timonium", text: $fromCity)
+    LabeledField(title: "State", placeholder: "MD", text: $fromState, textCase: .characters)
+            .frame(width: 100)
+        }
+        HStack(spacing: Theme.Space.md) {
+        LabeledField(title: "ZIP", placeholder: "21093", text: $fromZip, keyboard: .numbersAndPunctuation)
+        LabeledField(title: "Country", placeholder: "US", text: $fromCountry, textCase: .characters)
+                .frame(width: 100)
             }
         }
     }
-    
-    @ViewBuilder
-    private func rateResultsView(response: RateResponse) -> some View {
-        if response.RatedShipment.isEmpty {
-            Label("No rates available for this route", systemImage: "info.circle")
-                .foregroundColor(.orange)
-        } else {
-            ForEach(response.RatedShipment.indices, id: \.self) { index in
-                let ratedShipment = response.RatedShipment[index]
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(ratedShipment.serviceName)
-                            .font(.headline)
-                        Spacer()
-                        Text(ratedShipment.formattedPrice)
-                            .font(.headline)
-                            .foregroundColor(.primary)
-                    }
-                    
-                    if let estimate = ratedShipment.deliveryEstimate {
-                        Text(estimate)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    if let negotiated = ratedShipment.NegotiatedRateCharges {
-                        Text("Negotiated: \(negotiated.TotalCharge.CurrencyCode) \(negotiated.TotalCharge.MonetaryValue)")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                    }
-                }
-                .padding(.vertical, 2)
+
+// To
+ResultCard(title: "To Address", subtitle: nil) {
+VStack(spacing: Theme.Space.md) {
+LabeledField(title: "Street", placeholder: "456 Oak Avenue", text: $toStreet)
+    HStack(spacing: Theme.Space.md) {
+            LabeledField(title: "City", placeholder: "Alpharetta", text: $toCity)
+            LabeledField(title: "State", placeholder: "GA", text: $toState, textCase: .characters)
+            .frame(width: 100)
+    }
+        HStack(spacing: Theme.Space.md) {
+            LabeledField(title: "ZIP", placeholder: "30005", text: $toZip, keyboard: .numbersAndPunctuation)
+                LabeledField(title: "Country", placeholder: "US", text: $toCountry, textCase: .characters)
+                    .frame(width: 100)
             }
-        }
-    }
-    
-    private var isFormValid: Bool {
-        !fromZip.isEmpty && !fromState.isEmpty &&
-        !toZip.isEmpty && !toState.isEmpty &&
-        !weight.isEmpty && !length.isEmpty && !width.isEmpty && !height.isEmpty &&
-        Double(weight) != nil && Double(length) != nil && 
-        Double(width) != nil && Double(height) != nil
-    }
-    
-    private func initializeService() {
-        do {
-            ratingService = try UPSRatingService()
-        } catch {
-            errorMessage = "Failed to initialize rating service: \(error.localizedDescription)"
-            showingResults = true
-        }
-    }
-    
-    private func fillSampleData() {
-        // From address (Timonium, MD)
-        fromStreet = "123 Main Street"
-        fromCity = "TIMONIUM"
-        fromState = "MD"
-        fromZip = "21093"
-        fromCountry = "US"
-        
-        // To address (Alpharetta, GA)
-        toStreet = "456 Oak Avenue"
-        toCity = "Alpharetta"
-        toState = "GA"
-        toZip = "30005"
-        toCountry = "US"
-        isResidential = true
-        
-        // Package details
-        weight = "2.5"
-        length = "10"
-        width = "8"
-        height = "6"
-    }
-    
-    private func calculateRates() {
-        guard let service = ratingService,
-              let weightVal = Double(weight),
-              let lengthVal = Double(length),
-              let widthVal = Double(width),
-              let heightVal = Double(height) else {
-            errorMessage = "Invalid input values"
-            showingResults = true
-            return
-        }
-        
-        isLoading = true
-        errorMessage = nil
-        rateResponse = nil
-        showingResults = true
-        
-        Task {
-            let result = await service.quickShop(
-                fromZip: fromZip,
-                fromState: fromState,
-                fromCountry: fromCountry,
-                toZip: toZip,
-                toState: toState,
-                toCountry: toCountry,
-                weightLbs: weightVal,
-                length: lengthVal,
-                width: widthVal,
-                height: heightVal,
-                isResidential: isResidential
-            )
-            
-            await MainActor.run {
-                isLoading = false
-                
-                switch result {
-                case .success(let response):
-                    rateResponse = response
-                    errorMessage = nil
-                    
-                    #if DEBUG
-                    service.debugPrintResponse(response)
-                    #endif
-                    
-                case .failure(let error):
-                    rateResponse = nil
-                    errorMessage = formatErrorMessage(error)
-                }
-            }
-        }
-    }
-    
-    private func formatErrorMessage(_ error: UPSError) -> String {
-        switch error {
-        case .invalidResponse(let message):
-            return "API Error: \(message)"
-        case .serviceUnavailable:
-            return "Service unavailable for this route"
-        case .configurationError(let message):
-            return "Configuration error: \(message)"
-        case .decodingError(let error):
-            return "Response parsing error: \(error.localizedDescription)"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
-        default:
-            return "Rate calculation failed: \(error.localizedDescription)"
+        Toggle("Residential Address", isOn: $isResidential)
+        .padding(.top, 4)
+}
+}
+
+// Package
+ResultCard(title: "Package", subtitle: "inches • lbs") {
+    VStack(spacing: Theme.Space.md) {
+    HStack(spacing: Theme.Space.md) {
+        LabeledField(title: "Weight (lbs)", placeholder: "2.5", text: $weight, keyboard: .decimalPad)
+        LabeledField(title: "Length", placeholder: "10", text: $length, keyboard: .decimalPad)
+    LabeledField(title: "Width", placeholder: "8", text: $width, keyboard: .decimalPad)
+    LabeledField(title: "Height", placeholder: "6", text: $height, keyboard: .decimalPad)
         }
     }
 }
 
-#Preview {
-    RateCalculationView()
+// Actions
+VStack(spacing: Theme.Space.md) {
+Button {
+        fillSample()
+    } label: {
+    Label("Use Sample Data", systemImage: "sparkles")
+        .frame(maxWidth: .infinity)
 }
+.buttonStyle(SecondaryButtonStyle())
+
+    Button(action: calculateRates) {
+            if isLoading { ProgressView().frame(maxWidth: .infinity, minHeight: 50) }
+            else { Label("Calculate Rates", systemImage: "dollarsign.circle").frame(maxWidth: .infinity) }
+        }
+    .buttonStyle(PrimaryButtonStyle())
+.disabled(!isFormValid || isLoading)
+    .opacity(isFormValid ? 1 : 0.6)
+}
+}
+.padding(Theme.Space.lg)
+}
+.toolbar {
+ToolbarItem(placement: .topBarLeading) { Button("Close") { dismiss() } }
+}
+.sheet(isPresented: $showSheet) {
+RateResultsSheet(rateResponse: rateResponse, errorMessage: errorMessage)
+.presentationDetents([.fraction(0.35), .medium, .large])
+.presentationDragIndicator(.visible)
+}
+.onAppear(perform: initializeService)
+.navigationTitle("Rate Calculator")
+.navigationBarTitleDisplayMode(.inline)
+}
+}
+
+private var isFormValid: Bool {
+!fromZip.isEmpty && !fromState.isEmpty &&
+!toZip.isEmpty && !toState.isEmpty &&
+!weight.isEmpty && !length.isEmpty && !width.isEmpty && !height.isEmpty &&
+Double(weight) != nil && Double(length) != nil &&
+Double(width) != nil && Double(height) != nil
+}
+
+private func initializeService() {
+do { ratingService = try UPSRatingService() }
+catch {
+errorMessage = "Failed to initialize rating service: \(error.localizedDescription)"
+showSheet = true
+}
+}
+
+private func fillSample() {
+fromStreet = "123 Main Street"; fromCity = "TIMONIUM"; fromState = "MD"; fromZip = "21093"; fromCountry = "US"
+toStreet = "456 Oak Avenue"; toCity = "Alpharetta"; toState = "GA"; toZip = "30005"; toCountry = "US"; isResidential = true
+weight = "2.5"; length = "10"; width = "8"; height = "6"
+Haptics.tap()
+}
+
+private func calculateRates() {
+    guard let service = ratingService,
+          let weightVal = Double(weight),
+          let lengthVal = Double(length),
+          let widthVal = Double(width),
+      let heightVal = Double(height) else {
+errorMessage = "Invalid input values"
+showSheet = true
+    return
+}
+
+isLoading = true
+errorMessage = nil
+rateResponse = nil
+
+Task {
+let result = await service.quickShop(
+fromZip: fromZip, fromState: fromState, fromCountry: fromCountry,
+toZip: toZip, toState: toState, toCountry: toCountry,
+weightLbs: weightVal, length: lengthVal, width: widthVal, height: heightVal,
+isResidential: isResidential
+)
+
+await MainActor.run {
+isLoading = false
+switch result {
+case .success(let r):
+rateResponse = r
+Haptics.success()
+case .failure(let e):
+rateResponse = nil
+errorMessage = formatErrorMessage(e)
+Haptics.error()
+}
+showSheet = true
+}
+}
+}
+
+private func formatErrorMessage(_ error: UPSError) -> String {
+switch error {
+case .invalidResponse(let message): return "API Error: \(message)"
+case .serviceUnavailable: return "Service unavailable for this route"
+case .configurationError(let message): return "Configuration error: \(message)"
+case .decodingError(let e): return "Response parsing error: \(e.localizedDescription)"
+    case .networkError(let e): return "Network error: \(e.localizedDescription)"
+    default: return "Rate calculation failed: \(error.localizedDescription)"
+    }
+}
+}
+
+// MARK: - Results Sheet
+
+private struct RateResultsSheet: View {
+let rateResponse: RateResponse?
+let errorMessage: String?
+
+var body: some View {
+VStack(spacing: Theme.Space.lg) {
+    if let errorMessage {
+        ResultCard(title: "Rate Lookup Failed", subtitle: nil) {
+            Text(errorMessage).foregroundStyle(.secondary)
+        }
+    } else if let response = rateResponse {
+        ResultCard(title: "Available Services", subtitle: "\(response.RatedShipment.count) option(s)") {
+            if response.RatedShipment.isEmpty {
+                Label("No rates available for this route", systemImage: "info.circle")
+                    .foregroundStyle(Theme.warning)
+            } else {
+                VStack(spacing: Theme.Space.md) {
+                    ForEach(response.RatedShipment.indices, id: \.self) { idx in
+                        let r = response.RatedShipment[idx]
+                        HStack(alignment: .firstTextBaseline) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(r.serviceName).font(.headline)
+                                if let estimate = r.deliveryEstimate {
+                                    Text(estimate).font(.caption).foregroundStyle(.secondary)
+                                    }
+                                    if let negotiated = r.NegotiatedRateCharges {
+                                        Text("Negotiated: \(negotiated.TotalCharge.CurrencyCode) \(negotiated.TotalCharge.MonetaryValue)")
+                                        .font(.caption).foregroundStyle(.green)
+                          }
+                      }
+                      Spacer()
+                      Text(r.formattedPrice).font(.headline)
+                    }
+                    .padding(Theme.Space.md)
+                    .background(Theme.fieldBG, in: RoundedRectangle(cornerRadius: Theme.Radius.md))
+                    }
+                }
+            }
+        }
+    } else {
+        ProgressView()
+    }
+}
+.padding(Theme.Space.lg)
+}
+}
+
+#Preview { RateCalculationView() }
