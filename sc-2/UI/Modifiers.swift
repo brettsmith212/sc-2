@@ -3,13 +3,15 @@ import SwiftUI
 struct CardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .padding(Theme.Space.lg)
-            .background(Theme.cardBG, in: RoundedRectangle(cornerRadius: Theme.Radius.lg, style: .continuous))
+            .padding(16)
+            .background(Theme.Colors.surface, in: RoundedRectangle(cornerRadius: Theme.Radii.l, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: Theme.Radius.lg, style: .continuous)
-                    .stroke(Theme.stroke)
+                RoundedRectangle(cornerRadius: Theme.Radii.l, style: .continuous)
+                    .stroke(Theme.Colors.separator, lineWidth: 1)
             )
-            .themedShadow(Theme.Shadow.soft)
+            .shadow(color: Color.black.opacity(Theme.Shadows.level1.opacity),
+                    radius: Theme.Shadows.level1.radius,
+                    x: 0, y: Theme.Shadows.level1.y)
     }
 }
 
@@ -17,12 +19,12 @@ struct FieldModifier: ViewModifier {
     let isError: Bool
     func body(content: Content) -> some View {
         content
-            .padding(.horizontal, Theme.Space.md)
-            .padding(.vertical, Theme.Space.sm)
-            .background(Theme.fieldBG, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Theme.Colors.Neutral.n50, in: RoundedRectangle(cornerRadius: Theme.Radii.m, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous)
-                    .stroke(isError ? Theme.danger.opacity(0.6) : Theme.stroke, lineWidth: 1)
+                RoundedRectangle(cornerRadius: Theme.Radii.m, style: .continuous)
+                    .stroke(isError ? Theme.Colors.error : Theme.Colors.separator, lineWidth: 1)
             )
     }
 }
