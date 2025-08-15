@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var secretsStatus = "Loading..."
     @State private var showingAddressValidation = false
     @State private var showingRateCalculation = false
 
@@ -9,53 +8,40 @@ struct ContentView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 20) {
-                    // Header + status
-                    Card {
-                        VStack(alignment: .leading, spacing: 16) {
-                            IconTitle(systemName: "shippingbox.circle.fill",
-                                      title: "UPS Integration Demo",
-                                      subtitle: "Address validation and rate shopping")
-                            ResultCard(title: "Configuration Status", subtitle: nil) {
-                                Text(secretsStatus)
-                                    .font(Theme.Typography.body)
-                                    .foregroundColor(secretsStatus.contains("Error") ? Theme.Colors.error : Theme.Colors.success)
-                            }
-                        }
-                    }
+                    // App header
+                    IconTitle(systemName: "shippingbox.circle.fill",
+                              title: "Ship Complete",
+                              subtitle: "UPS address check and rate shopping")
+                        .padding(.top, 8)
 
-                    // Actions
+                    // Primary actions
                     VStack(spacing: 12) {
                         Button {
                             Haptics.tap(); showingAddressValidation = true
                         } label: { Label("Address Validation", systemImage: "location.circle") }
                         .buttonStyle(TonalButtonStyle())
-                        .disabled(secretsStatus.contains("Error"))
 
                         Button {
                             Haptics.tap(); showingRateCalculation = true
                         } label: { Label("Rate Calculator", systemImage: "dollarsign.circle") }
                         .buttonStyle(FilledButtonStyle())
-                        .disabled(secretsStatus.contains("Error"))
                     }
                 }
                 .padding(16)
             }
             .background(Theme.Colors.bg.ignoresSafeArea())
-            .navigationTitle("sc-2")
-            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("Ship Complete")
+                        .font(Theme.Typography.title1)
+                        .foregroundColor(Theme.Colors.text)
+                }
+            }
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarBackground(Theme.Colors.bg, for: .navigationBar)
         }
         .sheet(isPresented: $showingAddressValidation) { AddressValidationView() }
         .sheet(isPresented: $showingRateCalculation) { RateCalculationView() }
-        .onAppear(perform: loadSecrets)
-    }
-
-    private func loadSecrets() {
-        do {
-            let config = try Config()
-            secretsStatus = "✅ Config loaded successfully!\nOAuth URL: \(config.oauthBaseURL)\nAPI URL: \(config.apiBaseURL)"
-        } catch {
-            secretsStatus = "❌ Error loading config:\n\(error.localizedDescription)"
-        }
     }
 }
 
