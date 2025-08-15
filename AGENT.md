@@ -14,33 +14,26 @@ iOS SwiftUI app called sc-2 with UPS API integration for address validation and 
 
 ### Build Commands
 
-#### Using VS Code Tasks (Recommended)
+#### Using Makefile (Recommended)
 
-- **Cmd+Shift+B** - Default build task (iOS: Build Debug simulator)
-- **Cmd+Shift+P** → "Tasks: Run Task" for other options:
-  - `iOS: Build Debug (simulator)` - Build for simulator
-  - `iOS: Clean` - Clean build artifacts
-  - `iOS: Test (simulator)` - Run tests
+Use these commands from the repo root:
+
+- `make run` — Build, install to the booted simulator, and launch the app (use this to test end-to-end).
+- `make build` — Build for the iOS Simulator (defaults to iPhone 16).
+- `make install` — Install the last built app to the booted simulator.
+- `make launch` — Launch the installed app on the booted simulator.
+- `make clean` — Clean build artifacts.
+- `make test` — Run tests on the simulator.
+- `make refresh-lsp` — Refresh xcode-build-server index for LSP.
 
 #### Command Line
 
-```bash
-# Build for simulator
-xcodebuild -project sc-2.xcodeproj -scheme sc-2 -configuration Debug -destination "platform=iOS Simulator,name=iPhone 16" -derivedDataPath build build
-
-# Clean
-xcodebuild -project sc-2.xcodeproj -scheme sc-2 clean
-
-# Test
-xcodebuild -project sc-2.xcodeproj -scheme sc-2 -destination "platform=iOS Simulator,name=iPhone 16" test
-```
+The [Makefile](Makefile) wraps `xcodebuild` and `simctl` for consistency. Prefer `make run` to build, install, and launch.
 
 ### VS Code Integration
 
 - **Language Server**: SourceKit-LSP via Swift extension
 - **Build Server**: xcode-build-server configured for sc-2.xcodeproj
-- **Tasks**: Defined in `.vscode/tasks.json`
-- **Debug**: Configured in `.vscode/launch.json`
 
 ### Project Structure
 
@@ -65,9 +58,6 @@ sc-2/
 │       └── HTTPClient.swift          # HTTP networking layer
 ├── sc-2.xcodeproj/
 ├── Config.xcconfig                   # UPS API credentials
-├── .vscode/
-│   ├── tasks.json                    # Build tasks
-│   └── launch.json                   # Debug config
 └── buildServer.json                  # xcode-build-server config
 ```
 
@@ -133,7 +123,8 @@ sc-2/
 
 ### Notes
 
-- Project builds successfully with warnings (no errors)
-- Uses iPhone 16 simulator by default
-- Build artifacts go to `build/` directory
-- xcode-build-server provides LSP integration for VS Code
+- Use `make run` to build, install, and launch on the simulator.
+- Project builds successfully with warnings (no errors).
+- Uses iPhone 16 simulator by default.
+- Build artifacts go to `build/` directory.
+- xcode-build-server provides LSP integration for VS Code.

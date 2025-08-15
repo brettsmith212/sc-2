@@ -1,5 +1,4 @@
 {
-    "files.associations": {
-        "*.swift": "swift"
-    }
+  "files.associations": { "*.swift": "swift" },
+  "makefile.configureOnOpen": false
 }

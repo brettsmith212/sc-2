@@ -5,6 +5,11 @@
 ## User settings
 xcuserdata/
 
+build.log
+buildServer.json
+.compile
+
+
 ## compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
 *.xcscmblueprint
 *.xccheckout
@@ -130,3 +135,5 @@ Config.xcconfig
 # XCTest artifacts
 *.coverage
 *.profdata
+
+repomix-output.md
