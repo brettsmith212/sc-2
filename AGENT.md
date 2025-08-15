@@ -6,29 +6,13 @@ iOS SwiftUI app called sc-2 with UPS API integration for address validation and 
 
 ## Build & Development Setup
 
+To build and run simulator, use the xcodebuildmcp commands.
+
 ### Prerequisites
 
 - Xcode installed (for SDKs and toolchain)
 - VS Code with Swift extension
 - xcode-build-server (installed via Homebrew)
-
-### Build Commands
-
-#### Using Makefile (Recommended)
-
-Use these commands from the repo root:
-
-- `make run` — Build, install to the booted simulator, and launch the app (use this to test end-to-end).
-- `make build` — Build for the iOS Simulator (defaults to iPhone 16).
-- `make install` — Install the last built app to the booted simulator.
-- `make launch` — Launch the installed app on the booted simulator.
-- `make clean` — Clean build artifacts.
-- `make test` — Run tests on the simulator.
-- `make refresh-lsp` — Refresh xcode-build-server index for LSP.
-
-#### Command Line
-
-The [Makefile](Makefile) wraps `xcodebuild` and `simctl` for consistency. Prefer `make run` to build, install, and launch.
 
 ### VS Code Integration
 
