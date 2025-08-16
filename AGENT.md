@@ -37,10 +37,16 @@ sc-2/
 │   ├── Services/
 │   │   ├── UPSRatingService.swift    # UPS Rating API service
 │   │   ├── UPSAddressValidationService.swift # UPS Address Validation service
-│   │   └── UPSOAuthService.swift     # UPS OAuth authentication
+│   │   ├── UPSOAuthService.swift     # UPS OAuth authentication
+│   │   └── ConvexService.swift       # Convex backend service
+│   ├── Views/
+│   │   └── ConvexStatusView.swift    # Backend connection status
 │   └── Networking/
 │       └── HTTPClient.swift          # HTTP networking layer
 ├── sc-2.xcodeproj/
+├── convex/                           # Convex backend
+│   ├── schema.ts                     # Database schema (users, addresses, packages)
+│   └── test.ts                       # Test functions for connection verification
 ├── Config.xcconfig                   # UPS API credentials
 └── buildServer.json                  # xcode-build-server config
 ```
@@ -52,6 +58,7 @@ sc-2/
 - CoreLocation (location services)
 - UserNotifications (push notifications)
 - MapKit (map display)
+- ConvexMobile (backend integration)
 
 ### UPS API Configuration
 
@@ -66,6 +73,42 @@ sc-2/
   - `UPS_OAUTH_BASE_URL=https://wwwcie.ups.com`
 
 - **Info.plist**: Maps configuration values for runtime access
+
+### Convex Backend Integration
+
+#### Backend Setup
+
+- **Deployment URL**: `https://hidden-labrador-91.convex.cloud`
+- **Environment**: Development deployment managed via `.env.local`
+
+#### Database Tables
+
+- **test_entries**: Connection testing (temporary)
+- **users**: User authentication and profiles (PoC ready)
+- **addresses**: Address management with validation (PoC ready)
+- **packages**: Package dimensions and details (PoC ready)
+
+#### Deployment Commands
+
+**Deploy schema and function changes:**
+```bash
+npx convex dev --once
+```
+
+**Start continuous development mode:**
+```bash
+npx convex dev
+```
+
+**Important**: Run `npx convex dev --once` after making changes to:
+- `convex/schema.ts` (database schema)
+- `convex/*.ts` (backend functions)
+
+#### Connection Status
+
+- App displays real-time Convex connection status (green dot = connected)
+- ConvexService provides singleton client for all backend operations
+- Automatic connection testing on app launch
 
 #### UPS API Integration Learnings
 

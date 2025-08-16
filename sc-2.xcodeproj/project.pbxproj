@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F01439A2E50001F008B5106 /* ConvexMobile in Frameworks */ = {isa = PBXBuildFile; productRef = 1F0143992E50001F008B5106 /* ConvexMobile */; };
 		1FFDCA982E419C8F004FF726 /* Config.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 1FFDCA972E419C8F004FF726 /* Config.xcconfig */; };
 /* End PBXBuildFile section */
 
@@ -57,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F01439A2E50001F008B5106 /* ConvexMobile in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -118,6 +120,7 @@
 			);
 			name = "sc-2";
 			packageProductDependencies = (
+				1F0143992E50001F008B5106 /* ConvexMobile */,
 			);
 			productName = "sc-2";
 			productReference = 1FFDCA672E4195DB004FF726 /* sc-2.app */;
@@ -201,6 +204,9 @@
 			);
 			mainGroup = 1FFDCA5E2E4195DB004FF726;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1F0143982E50001F008B5106 /* XCRemoteSwiftPackageReference "convex-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1FFDCA682E4195DB004FF726 /* Products */;
 			projectDirPath = "";
@@ -583,6 +589,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1F0143982E50001F008B5106 /* XCRemoteSwiftPackageReference "convex-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/get-convex/convex-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.5;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1F0143992E50001F008B5106 /* ConvexMobile */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F0143982E50001F008B5106 /* XCRemoteSwiftPackageReference "convex-swift" */;
+			productName = ConvexMobile;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1FFDCA5F2E4195DB004FF726 /* Project object */;
 }

@@ -1,0 +1,26 @@
+{
+  "name": "sc-2",
+  "version": "1.0.0",
+  "description": "SwiftUI app with UPS Address Validation and Rating examples.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brettsmith212/sc-2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brettsmith212/sc-2/issues"
+  },
+  "homepage": "https://github.com/brettsmith212/sc-2#readme",
+  "dependencies": {
+    "convex": "^1.25.4"
+  }
+}

@@ -1,10 +1,11 @@
 # sc-2 iOS App
 
-SwiftUI app with UPS Address Validation and Rating examples.
+SwiftUI app with UPS Address Validation and Rating examples, integrated with Convex backend for data management.
 
 ## Prerequisites
 
 - Xcode (with iOS Simulator)
+- Node.js and npm (for Convex backend)
 - xcode-build-server (for IDE language features). Install via Homebrew:
   ```bash
   brew install xcode-build-server
@@ -12,13 +13,27 @@ SwiftUI app with UPS Address Validation and Rating examples.
 
 ## Getting started
 
-1. Generate the build server index `buildServer.json`
+### 1. Set up the Convex Backend
+
+First, install the Node.js dependencies and set up the Convex backend:
+
+```bash
+# Install dependencies
+npm install
+
+# Set up Convex (first time only - creates .env.local)
+npx convex dev --once
+```
+
+The backend will be deployed to your Convex development instance. The app will connect automatically.
+
+### 2. Generate the build server index
 
 ```bash
 make refresh-lsp
 ```
 
-2. Start the iOS Simulator on your Mac
+### 3. Start the iOS Simulator on your Mac
 
 - Open the Simulator app, or run:
   ```bash
@@ -27,11 +42,13 @@ make refresh-lsp
   xcrun simctl boot "iPhone 16"
   ```
 
-3. Build, install, and launch the app on the Simulator
+### 4. Build, install, and launch the app on the Simulator
 
 ```bash
 make run
 ```
+
+The app will show a green "Convex: Connected" indicator when the backend connection is established.
 
 ## Other useful commands
 
@@ -47,6 +64,22 @@ make run
   ```bash
   make clean
   ```
+
+## Backend Development
+
+When making changes to the Convex backend:
+
+```bash
+# Deploy schema/function changes
+npx convex dev --once
+
+# Start continuous development mode (watches for changes)
+npx convex dev
+```
+
+**Important**: Run `npx convex dev --once` after modifying:
+- `convex/schema.ts` (database schema)
+- `convex/*.ts` (backend functions)
 
 ## Configuration (UPS APIs)
 

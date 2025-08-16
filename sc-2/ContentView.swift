@@ -14,6 +14,11 @@ struct ContentView: View {
                               subtitle: "UPS address check and rate shopping")
                         .padding(.top, 8)
 
+                    // Backend Status
+                    VStack(alignment: .leading, spacing: 4) {
+                        ConvexStatusView()
+                    }
+                    
                     // Primary actions
                     VStack(spacing: 12) {
                         Button {
