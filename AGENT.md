@@ -33,7 +33,9 @@ sc-2/
 │   │   └── UPSError.swift            # UPS error handling
 │   ├── Views/
 │   │   ├── RateCalculationView.swift # Rate calculation form
-│   │   └── AddressValidationView.swift # Address validation form
+│   │   ├── AddressValidationView.swift # Address validation form
+│   │   ├── LoginView.swift           # Authentication (Apple/Google Sign-In)
+│   │   └── AuthenticatedView.swift   # Main app wrapper with auth state
 │   ├── Services/
 │   │   ├── UPSRatingService.swift    # UPS Rating API service
 │   │   ├── UPSAddressValidationService.swift # UPS Address Validation service
@@ -45,8 +47,11 @@ sc-2/
 │       └── HTTPClient.swift          # HTTP networking layer
 ├── sc-2.xcodeproj/
 ├── convex/                           # Convex backend
-│   ├── schema.ts                     # Database schema (users, addresses, packages)
-│   └── test.ts                       # Test functions for connection verification
+│   ├── schema.ts                     # Database schema (users, addresses, packages, rates, payments, shipments, tracking_events)
+│   ├── test.ts                       # Test functions for connection verification
+│   ├── users.ts                      # User management functions
+│   ├── mobileAuth.ts                 # Mobile authentication HTTP endpoint
+│   └── http.ts                       # HTTP routes for mobile API
 ├── Config.xcconfig                   # UPS API credentials
 └── buildServer.json                  # xcode-build-server config
 ```
@@ -59,6 +64,8 @@ sc-2/
 - UserNotifications (push notifications)
 - MapKit (map display)
 - ConvexMobile (backend integration)
+- AuthenticationServices (Apple Sign-In)
+- GoogleSignIn + GoogleSignInSwift (Google authentication)
 
 ### UPS API Configuration
 
@@ -84,9 +91,13 @@ sc-2/
 #### Database Tables
 
 - **test_entries**: Connection testing (temporary)
-- **users**: User authentication and profiles (PoC ready)
+- **users**: User authentication and profiles (✅ implemented with Apple/Google Sign-In)
 - **addresses**: Address management with validation (PoC ready)
 - **packages**: Package dimensions and details (PoC ready)
+- **rates**: Rate caching with expiration (PoC ready)
+- **payments**: Payment processing and status tracking (PoC ready)
+- **shipments**: Label creation and shipment management (PoC ready)
+- **tracking_events**: Shipment tracking timeline (PoC ready)
 
 #### Deployment Commands
 
@@ -109,6 +120,18 @@ npx convex dev
 - App displays real-time Convex connection status (green dot = connected)
 - ConvexService provides singleton client for all backend operations
 - Automatic connection testing on app launch
+
+### Authentication
+
+Apple Sign-In uses native AuthenticationServices framework and Google Sign-In uses GoogleSignIn iOS SDK, both creating users in Convex backend via mobile HTTP endpoint with local session persistence.
+
+#### Authentication Setup
+
+- **Apple Sign-In**: Native iOS with `SignInWithAppleButton` from `AuthenticationServices`
+- **Google Sign-In**: Native iOS with `GoogleSignInButton` from `GoogleSignInSwift` 
+- **Backend Integration**: HTTP endpoint `/mobile/register-user` stores user data in Convex
+- **Session Management**: UserDefaults stores local session, checks on app launch
+- **User Creation**: Both providers create/update users in Convex `users` table with unique `auth_user_id`
 
 #### UPS API Integration Learnings
 

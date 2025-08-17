@@ -56,5 +56,22 @@
 	<string>$(UPS_API_BASE_URL)</string>
 	<key>UPS_ACCOUNT_NUMBER</key>
 	<string>$(UPS_ACCOUNT_NUMBER)</string>
+	
+	<!-- Google Sign-In Configuration -->
+	<key>GIDClientID</key>
+	<string>121586953508-vsqqrblfb01lnomhikqmg12r2889bn6t.apps.googleusercontent.com</string>
+	
+	<!-- URL Schemes for Google Sign-In -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>GoogleSignIn</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.121586953508-vsqqrblfb01lnomhikqmg12r2889bn6t</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>
