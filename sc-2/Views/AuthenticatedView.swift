@@ -85,6 +85,8 @@ struct AuthenticatedView: View {
 struct MainAppView: View {
     let currentUser: User?
     @StateObject private var convexService = ConvexService.shared
+    @State private var showingAddressValidation = false
+    @State private var showingRateCalculation = false
     
     var body: some View {
         NavigationStack {
@@ -122,14 +124,12 @@ struct MainAppView: View {
                     // Primary actions
                     VStack(spacing: 12) {
                         Button {
-                            Haptics.tap()
-                            // TODO: Navigate to address validation
+                            Haptics.tap(); showingAddressValidation = true
                         } label: { Label("Address Validation", systemImage: "location.circle") }
                         .buttonStyle(TonalButtonStyle())
 
                         Button {
-                            Haptics.tap()
-                            // TODO: Navigate to rate calculator
+                            Haptics.tap(); showingRateCalculation = true
                         } label: { Label("Rate Calculator", systemImage: "dollarsign.circle") }
                         .buttonStyle(FilledButtonStyle())
                     }
@@ -147,6 +147,8 @@ struct MainAppView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbarBackground(Theme.Colors.bg, for: .navigationBar)
         }
+        .sheet(isPresented: $showingAddressValidation) { AddressValidationView() }
+        .sheet(isPresented: $showingRateCalculation) { RateCalculationView() }
     }
     
     private func signOut() async {
