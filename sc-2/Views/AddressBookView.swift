@@ -39,6 +39,7 @@ struct AddressBookView: View {
     @State private var bannerMessage: String?
     @State private var bannerType: BannerType = .success
     @State private var showingBanner = false
+    @State private var isInitialLoad = true
     
     var body: some View {
         NavigationStack {
@@ -178,9 +179,14 @@ struct AddressBookView: View {
                     isLoading = false
                     errorMessage = nil
                     
-                    // Show success banner if new address was added
-                    if loadedAddresses.count > previousCount {
+                    // Show success banner only if new address was added (not on initial load)
+                    if !isInitialLoad && loadedAddresses.count > previousCount {
                         showBanner(message: "Address saved successfully!", type: .success)
+                    }
+                    
+                    // Mark initial load as complete
+                    if isInitialLoad {
+                        isInitialLoad = false
                     }
                 }
             )
