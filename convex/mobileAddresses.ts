@@ -1,5 +1,5 @@
 import { httpAction } from "./_generated/server";
-import { api } from "./_generated/api";
+import { internal } from "./_generated/api";
 
 export const saveMobileAddress = httpAction(async (ctx, request) => {
   const body = await request.json();
@@ -18,7 +18,7 @@ export const saveMobileAddress = httpAction(async (ctx, request) => {
   
   try {
     // Create the address using internal mutation, passing userId directly  
-    const addressId = await ctx.runMutation(api.addresses.createValidatedAddressInternal, {
+    const addressId = await ctx.runMutation(internal.addresses.createValidatedAddressInternal, {
       userId: userId as any, // Cast to bypass type checking since we know this is a valid user ID
       label,
       name,
@@ -68,7 +68,7 @@ export const listMobileAddresses = httpAction(async (ctx, request) => {
   
   try {
     // Get addresses using internal query
-    const addresses = await ctx.runQuery(api.addresses.listAddressesInternal, {
+    const addresses = await ctx.runQuery(internal.addresses.listAddressesInternal, {
       userId: userId as any,
       validatedOnly: true
     });

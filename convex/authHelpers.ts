@@ -7,8 +7,8 @@ import { QueryCtx, MutationCtx } from "./_generated/server";
  * @returns UserIdentity if authenticated
  * @throws Error if not authenticated
  */
-export function requireLogin(ctx: QueryCtx | MutationCtx): UserIdentity {
-  const user = ctx.auth.getUserIdentity();
+export async function requireLogin(ctx: QueryCtx | MutationCtx): Promise<UserIdentity> {
+  const user = await ctx.auth.getUserIdentity();
   if (!user) {
     throw new Error("Not authenticated");
   }
@@ -21,7 +21,7 @@ export function requireLogin(ctx: QueryCtx | MutationCtx): UserIdentity {
  * @returns User ID string
  * @throws Error if not authenticated
  */
-export function getUserId(ctx: QueryCtx | MutationCtx): string {
-  const user = requireLogin(ctx);
+export async function getUserId(ctx: QueryCtx | MutationCtx): Promise<string> {
+  const user = await requireLogin(ctx);
   return user.subject;
 }

@@ -6,6 +6,26 @@
 //
 
 import SwiftUI
+import Combine
+
+enum BannerType {
+    case success
+    case error
+    
+    var color: Color {
+        switch self {
+        case .success: return .green
+        case .error: return .red
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .success: return "checkmark.circle.fill"
+        case .error: return "exclamationmark.triangle.fill"
+        }
+    }
+}
 
 struct AddressBookView: View {
     @Environment(\.dismiss) private var dismiss
@@ -15,6 +35,10 @@ struct AddressBookView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var showingAddressValidation = false
+    @State private var cancellables = Set<AnyCancellable>()
+    @State private var bannerMessage: String?
+    @State private var bannerType: BannerType = .success
+    @State private var showingBanner = false
     
     var body: some View {
         NavigationStack {
@@ -26,6 +50,21 @@ struct AddressBookView: View {
                         subtitle: "Your saved addresses"
                     )
                     .padding(.top, 8)
+                    
+                    // Banner notification
+                    if showingBanner, let message = bannerMessage {
+                        HStack {
+                            Image(systemName: bannerType.icon)
+                                .foregroundColor(bannerType.color)
+                            Text(message)
+                                .font(Theme.Typography.body)
+                                .foregroundColor(bannerType.color)
+                            Spacer()
+                        }
+                        .padding()
+                        .background(bannerType.color.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                        .transition(.slide.combined(with: .opacity))
+                    }
                     
                     if isLoading {
                         ProgressView("Loading addresses...")
@@ -106,29 +145,63 @@ struct AddressBookView: View {
             }
         }
         .task {
-            await loadAddresses()
+            await setupRealtimeSubscription()
         }
         .sheet(isPresented: $showingAddressValidation) {
             AddressValidationView()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .addressSaved)) { _ in
+            // Close the address validation sheet when address is saved
+            showingAddressValidation = false
+        }
     }
     
-    private func loadAddresses() async {
+    private func setupRealtimeSubscription() async {
         await MainActor.run {
             isLoading = true
             errorMessage = nil
         }
         
-        do {
-            let loadedAddresses = try await convexService.listAddresses(validatedOnly: true)
-            await MainActor.run {
-                addresses = loadedAddresses
-                isLoading = false
-            }
-        } catch {
-            await MainActor.run {
-                errorMessage = "Failed to load addresses: \(error.localizedDescription)"
-                isLoading = false
+        // Subscribe to real-time address updates
+        convexService.subscribeToAddresses(validatedOnly: true)
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { completion in
+                    if case .failure(let error) = completion {
+                        errorMessage = "Failed to load addresses: \(error.localizedDescription)"
+                    }
+                    isLoading = false
+                },
+                receiveValue: { loadedAddresses in
+                    let previousCount = addresses.count
+                    addresses = loadedAddresses
+                    isLoading = false
+                    errorMessage = nil
+                    
+                    // Show success banner if new address was added
+                    if loadedAddresses.count > previousCount {
+                        showBanner(message: "Address saved successfully!", type: .success)
+                    }
+                }
+            )
+            .store(in: &cancellables)
+    }
+    
+    private func loadAddresses() async {
+        await setupRealtimeSubscription()
+    }
+    
+    private func showBanner(message: String, type: BannerType) {
+        withAnimation {
+            bannerMessage = message
+            bannerType = type
+            showingBanner = true
+        }
+        
+        // Auto-hide after 3 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            withAnimation {
+                showingBanner = false
             }
         }
     }

@@ -3,6 +3,7 @@ import SwiftUI
 
 struct AddressValidationView: View {
     @Environment(\.dismiss) private var dismiss
+
     // State
     @State private var street: String = ""
     @State private var city: String = ""
@@ -119,11 +120,11 @@ struct AddressValidationView: View {
                                                         
                                                         // Save Button
                                                         Button {
-                                                            selectedCandidate = candidate
-                                                            showingSaveSheet = true
+                                                        selectedCandidate = candidate
+                                                        showingSaveSheet = true
                                                         } label: {
-                                                            Label("Save", systemImage: "plus.circle.fill")
-                                                                .font(.caption)
+                                                        Label("Save", systemImage: "plus.circle.fill")
+                                                        .font(.caption)
                                                         }
                                                         .buttonStyle(.bordered)
                                                         .controlSize(.small)

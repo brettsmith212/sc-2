@@ -85,13 +85,13 @@ class ConvexService: ObservableObject {
     
     // MARK: - Address Book Operations
     
-    /// Save a validated address to the user's address book
+    /// Save a validated address to the user's address book (real-time)
     func saveAddress(request: CreateAddressRequest) async throws -> String {
         guard let userId = UserDefaults.standard.string(forKey: "convex_user_id") else {
             throw ConvexServiceError.invalidResponse
         }
         
-        var requestBody: [String: Any] = [
+        var args: [String: ConvexEncodable?] = [
             "userId": userId,
             "label": request.label,
             "name": request.name,
@@ -102,93 +102,37 @@ class ConvexService: ObservableObject {
             "country": request.country
         ]
         
-        if let phone = request.phone { requestBody["phone"] = phone }
-        if let email = request.email { requestBody["email"] = email }
-        if let line2 = request.line2 { requestBody["line2"] = line2 }
-        
-        guard let url = URL(string: "https://hidden-labrador-91.convex.site/mobile/save-address") else {
-            throw ConvexServiceError.invalidResponse
+        // Only add optional fields if they have values
+        if let phone = request.phone, !phone.isEmpty {
+            args["phone"] = phone
+        }
+        if let email = request.email, !email.isEmpty {
+            args["email"] = email
+        }
+        if let line2 = request.line2, !line2.isEmpty {
+            args["line2"] = line2
         }
         
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = "POST"
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-        
-        let (data, _) = try await URLSession.shared.data(for: urlRequest)
-        
-        guard let response = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let success = response["success"] as? Bool,
-              success,
-              let addressId = response["addressId"] as? String else {
-            throw ConvexServiceError.invalidResponse
-        }
-        
+        let addressId: String = try await client.mutation("addresses:createAddressByUserId", with: args)
         return addressId
     }
     
-    /// Get all saved addresses for the current user
-    func listAddresses(validatedOnly: Bool = true) async throws -> [SavedAddress] {
+    /// Get real-time subscription to saved addresses (reactive)
+    func subscribeToAddresses(validatedOnly: Bool = true) -> AnyPublisher<[SavedAddress], any Error> {
         guard let userId = UserDefaults.standard.string(forKey: "convex_user_id") else {
-            throw ConvexServiceError.invalidResponse
+            return Fail(error: ConvexServiceError.invalidResponse)
+                .eraseToAnyPublisher()
         }
         
-        let requestBody: [String: Any] = [
+        let args: [String: ConvexEncodable?] = [
             "userId": userId,
             "validatedOnly": validatedOnly
         ]
         
-        guard let url = URL(string: "https://hidden-labrador-91.convex.site/mobile/list-addresses") else {
-            throw ConvexServiceError.invalidResponse
-        }
-        
-        var urlRequest = URLRequest(url: url)
-        urlRequest.httpMethod = "POST"
-        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-        
-        let (data, _) = try await URLSession.shared.data(for: urlRequest)
-        
-        guard let response = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let success = response["success"] as? Bool,
-              success,
-              let addressesData = response["addresses"] as? [[String: Any]] else {
-            throw ConvexServiceError.invalidResponse
-        }
-        
-        // Convert to SavedAddress objects
-        let addresses = try addressesData.compactMap { addressDict -> SavedAddress? in
-            guard let id = addressDict["_id"] as? String,
-                  let label = addressDict["label"] as? String,
-                  let name = addressDict["name"] as? String,
-                  let line1 = addressDict["line1"] as? String,
-                  let city = addressDict["city"] as? String,
-                  let state = addressDict["state"] as? String,
-                  let postalCode = addressDict["postal_code"] as? String,
-                  let country = addressDict["country"] as? String,
-                  let validated = addressDict["validated"] as? Bool,
-                  let creationTime = addressDict["_creationTime"] as? Double else {
-                return nil
-            }
-            
-            return SavedAddress(
-                id: id,
-                label: label,
-                name: name,
-                phone: addressDict["phone"] as? String,
-                email: addressDict["email"] as? String,
-                line1: line1,
-                line2: addressDict["line2"] as? String,
-                city: city,
-                state: state,
-                postalCode: postalCode,
-                country: country,
-                validated: validated,
-                creationTime: creationTime
-            )
-        }
-        
-        return addresses
+        return client.subscribe(to: "addresses:listAddressesByUserId", with: args, yielding: [SavedAddress].self)
+            .map { $0 as [SavedAddress] }
+            .mapError { $0 as Error }
+            .eraseToAnyPublisher()
     }
     
     /// Get a specific address by ID
