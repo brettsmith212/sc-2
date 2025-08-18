@@ -9,6 +9,7 @@ import Foundation
 import ConvexMobile
 import UIKit
 import GoogleSignIn
+import Combine
 
 /// Singleton service for managing Convex client and operations
 @MainActor
@@ -80,6 +81,156 @@ class ConvexService: ObservableObject {
         }
         
         return userId
+    }
+    
+    // MARK: - Address Book Operations
+    
+    /// Save a validated address to the user's address book
+    func saveAddress(request: CreateAddressRequest) async throws -> String {
+        guard let userId = UserDefaults.standard.string(forKey: "convex_user_id") else {
+            throw ConvexServiceError.invalidResponse
+        }
+        
+        var requestBody: [String: Any] = [
+            "userId": userId,
+            "label": request.label,
+            "name": request.name,
+            "line1": request.line1,
+            "city": request.city,
+            "state": request.state,
+            "postalCode": request.postalCode,
+            "country": request.country
+        ]
+        
+        if let phone = request.phone { requestBody["phone"] = phone }
+        if let email = request.email { requestBody["email"] = email }
+        if let line2 = request.line2 { requestBody["line2"] = line2 }
+        
+        guard let url = URL(string: "https://hidden-labrador-91.convex.site/mobile/save-address") else {
+            throw ConvexServiceError.invalidResponse
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+        
+        let (data, _) = try await URLSession.shared.data(for: urlRequest)
+        
+        guard let response = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let success = response["success"] as? Bool,
+              success,
+              let addressId = response["addressId"] as? String else {
+            throw ConvexServiceError.invalidResponse
+        }
+        
+        return addressId
+    }
+    
+    /// Get all saved addresses for the current user
+    func listAddresses(validatedOnly: Bool = true) async throws -> [SavedAddress] {
+        guard let userId = UserDefaults.standard.string(forKey: "convex_user_id") else {
+            throw ConvexServiceError.invalidResponse
+        }
+        
+        let requestBody: [String: Any] = [
+            "userId": userId,
+            "validatedOnly": validatedOnly
+        ]
+        
+        guard let url = URL(string: "https://hidden-labrador-91.convex.site/mobile/list-addresses") else {
+            throw ConvexServiceError.invalidResponse
+        }
+        
+        var urlRequest = URLRequest(url: url)
+        urlRequest.httpMethod = "POST"
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
+        
+        let (data, _) = try await URLSession.shared.data(for: urlRequest)
+        
+        guard let response = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let success = response["success"] as? Bool,
+              success,
+              let addressesData = response["addresses"] as? [[String: Any]] else {
+            throw ConvexServiceError.invalidResponse
+        }
+        
+        // Convert to SavedAddress objects
+        let addresses = try addressesData.compactMap { addressDict -> SavedAddress? in
+            guard let id = addressDict["_id"] as? String,
+                  let label = addressDict["label"] as? String,
+                  let name = addressDict["name"] as? String,
+                  let line1 = addressDict["line1"] as? String,
+                  let city = addressDict["city"] as? String,
+                  let state = addressDict["state"] as? String,
+                  let postalCode = addressDict["postal_code"] as? String,
+                  let country = addressDict["country"] as? String,
+                  let validated = addressDict["validated"] as? Bool,
+                  let creationTime = addressDict["_creationTime"] as? Double else {
+                return nil
+            }
+            
+            return SavedAddress(
+                id: id,
+                label: label,
+                name: name,
+                phone: addressDict["phone"] as? String,
+                email: addressDict["email"] as? String,
+                line1: line1,
+                line2: addressDict["line2"] as? String,
+                city: city,
+                state: state,
+                postalCode: postalCode,
+                country: country,
+                validated: validated,
+                creationTime: creationTime
+            )
+        }
+        
+        return addresses
+    }
+    
+    /// Get a specific address by ID
+    func getAddress(id: String) async throws -> SavedAddress {
+        let args: [String: ConvexEncodable?] = ["addressId": id]
+        
+        // Use subscribe for queries - get first result from publisher
+        let publisher = client.subscribe(to: "addresses:getAddress", with: args, yielding: SavedAddress.self)
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let cancellable = publisher.sink(
+                receiveCompletion: { completion in
+                    if case .failure(let error) = completion {
+                        continuation.resume(throwing: error)
+                    }
+                },
+                receiveValue: { address in
+                    continuation.resume(returning: address)
+                }
+            )
+            // Keep cancellable alive until continuation resolves
+            _ = cancellable
+        }
+    }
+    
+    /// Update an existing address
+    func updateAddress(id: String, label: String? = nil, name: String? = nil, phone: String? = nil, email: String? = nil) async throws -> String {
+        var args: [String: ConvexEncodable?] = ["addressId": id]
+        if let label = label { args["label"] = label }
+        if let name = name { args["name"] = name }
+        if let phone = phone { args["phone"] = phone }
+        if let email = email { args["email"] = email }
+        
+        let addressId: String = try await client.mutation("addresses:updateAddress", with: args)
+        return addressId
+    }
+    
+    /// Delete an address from the address book
+    func deleteAddress(id: String) async throws -> Bool {
+        let args: [String: ConvexEncodable?] = ["addressId": id]
+        let success: Bool = try await client.mutation("addresses:deleteAddress", with: args)
+        return success
     }
     
     /// Sign in with Google (native iOS SDK) 

@@ -15,6 +15,8 @@ struct AddressValidationView: View {
     @State private var validationResponse: XAVResponse?
     @State private var validationError: UPSError?
     @State private var showingResult: Bool = false
+    @State private var selectedCandidate: AddressCandidate?
+    @State private var showingSaveSheet = false
 
     // Service
     @StateObject private var validationService = UPSAddressValidationService()
@@ -89,32 +91,49 @@ struct AddressValidationView: View {
                         } else if let response = validationResponse {
                             ResultCard(title: statusText(for: response), subtitle: nil) {
                                 if let candidates = response.candidate, !candidates.isEmpty {
-                                    VStack(spacing: 8) {
-                                        ForEach(Array(candidates.enumerated()), id: \.offset) {
-                                            _, candidate in
-                                            if let address = candidate.addressKeyFormat {
-                                                HStack(alignment: .firstTextBaseline) {
-                                                    Image(systemName: "location.fill")
-                                                        .foregroundColor(Theme.Colors.primary)
-                                                    Text(address.formattedAddress)
-                                                        .font(Theme.Typography.body)
-                                                        .foregroundColor(Theme.Colors.text)
-                                                    Spacer()
-                                                }
-                                                if let classification = candidate
-                                                    .addressClassification
-                                                {
-                                                    HStack(spacing: 6) {
-                                                        Image(systemName: "tag.fill").font(
-                                                            .caption2
-                                                        ).foregroundColor(
-                                                            Theme.Colors.secondaryText)
-                                                        Text(classification.description)
-                                                            .font(Theme.Typography.caption)
-                                                            .foregroundColor(
-                                                                Theme.Colors.secondaryText)
+                                    VStack(spacing: 12) {
+                                        ForEach(Array(candidates.enumerated()), id: \.offset) { index, candidate in
+                                            VStack(spacing: 8) {
+                                                // Address Display
+                                                if let address = candidate.addressKeyFormat {
+                                                    HStack(alignment: .firstTextBaseline) {
+                                                        Image(systemName: "location.fill")
+                                                            .foregroundColor(Theme.Colors.primary)
+                                                        VStack(alignment: .leading, spacing: 2) {
+                                                            Text(address.formattedAddress)
+                                                                .font(Theme.Typography.body)
+                                                                .foregroundColor(Theme.Colors.text)
+                                                            
+                                                            if let classification = candidate.addressClassification {
+                                                                HStack(spacing: 6) {
+                                                                    Image(systemName: "tag.fill")
+                                                                        .font(.caption2)
+                                                                        .foregroundColor(Theme.Colors.secondaryText)
+                                                                    Text(classification.description)
+                                                                        .font(Theme.Typography.caption)
+                                                                        .foregroundColor(Theme.Colors.secondaryText)
+                                                                }
+                                                            }
+                                                        }
+                                                        Spacer()
+                                                        
+                                                        // Save Button
+                                                        Button {
+                                                            selectedCandidate = candidate
+                                                            showingSaveSheet = true
+                                                        } label: {
+                                                            Label("Save", systemImage: "plus.circle.fill")
+                                                                .font(.caption)
+                                                        }
+                                                        .buttonStyle(.bordered)
+                                                        .controlSize(.small)
                                                     }
                                                 }
+                                            }
+                                            .padding(.vertical, 4)
+                                            
+                                            if index < candidates.count - 1 {
+                                                Divider()
                                             }
                                         }
                                     }
@@ -133,6 +152,11 @@ struct AddressValidationView: View {
             .navigationTitle("UPS Address Validation")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .topBarLeading) { Button("Close") { dismiss() } } }
+        }
+        .sheet(isPresented: $showingSaveSheet) {
+            if let candidate = selectedCandidate {
+                SaveAddressSheet(candidate: candidate)
+            }
         }
     }
 

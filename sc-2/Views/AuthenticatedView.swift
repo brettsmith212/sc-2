@@ -87,6 +87,7 @@ struct MainAppView: View {
     @StateObject private var convexService = ConvexService.shared
     @State private var showingAddressValidation = false
     @State private var showingRateCalculation = false
+    @State private var showingAddressBook = false
     
     var body: some View {
         NavigationStack {
@@ -132,6 +133,11 @@ struct MainAppView: View {
                             Haptics.tap(); showingRateCalculation = true
                         } label: { Label("Rate Calculator", systemImage: "dollarsign.circle") }
                         .buttonStyle(FilledButtonStyle())
+                        
+                        Button {
+                            Haptics.tap(); showingAddressBook = true
+                        } label: { Label("Address Book", systemImage: "book.circle") }
+                        .buttonStyle(TonalButtonStyle())
                     }
                 }
                 .padding(16)
@@ -149,6 +155,7 @@ struct MainAppView: View {
         }
         .sheet(isPresented: $showingAddressValidation) { AddressValidationView() }
         .sheet(isPresented: $showingRateCalculation) { RateCalculationView() }
+        .sheet(isPresented: $showingAddressBook) { AddressBookView() }
     }
     
     private func signOut() async {
